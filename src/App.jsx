@@ -65,6 +65,7 @@ import DashboardAsesor from './components/DashboardAsesor/Dashboard';
 import Inventario from './components/Inventario';
 import DashboardDistribuidor from './components/DashboardDistribuidor/Dashboard';
 import DashboardTeleventas from './components/DashboardTeleventas/Dashboard';
+import Calculadora from './components/Calculadora/Calculadora';
 
 
 function App() {
@@ -83,6 +84,9 @@ function App() {
             } 
           />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/calculadora" element={<PrivateRoute>
+            <Calculadora/>
+          </PrivateRoute>} />
           <Route path="/catalogo" element={<PrivateRoute>
             <Inventario/>
           </PrivateRoute>} />
