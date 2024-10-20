@@ -1,54 +1,42 @@
-// useFetchVisitas.js
 import { useState, useEffect } from "react";
 import { supabase } from "../Functions/CreateClient";
 
 export const useFetchVisitas = () => {
   const [visitas, setVisitas] = useState([]);
-  const [filterType, setFilterType] = useState('day'); // 'day' or 'month'
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchVisitas();
-  }, [filterType, selectedDate]);
+  }, [startDate, endDate]);
 
   const fetchVisitas = async () => {
     setLoading(true);
-    let startDate, endDate;
-
-    if (filterType) {
-      // Para filtrado por día
-      startDate = new Date(selectedDate);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(selectedDate);
-      endDate.setHours(23, 59, 59, 999);
-    } else {
-      // Para filtrado por mes
-      startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0, 23, 59, 59, 999);
-    }
-
+    
     const { data, error } = await supabase
       .from("visitas")
       .select("*")
       .eq('estado', 'pendiente')
-      .gte('fecha', startDate.toISOString())
-      .lte('fecha', endDate.toISOString());
+      .gte('fecha', startDate)
+      .lte('fecha', `${endDate} 23:59:59`);
 
     if (error) {
       console.error("Error fetching visitas:", error);
+      setVisitas([]);
     } else {
-      setVisitas(data);
+      setVisitas(data || []);
     }
+    
     setLoading(false);
   };
 
   return {
     visitas,
     loading,
-    filterType,
-    selectedDate,
-    setFilterType,
-    setSelectedDate,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate
   };
 };

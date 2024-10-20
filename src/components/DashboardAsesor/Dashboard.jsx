@@ -5,58 +5,35 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { supabase } from "../Functions/CreateClient";
 
- const DashboardAsesor = () => {
+const DashboardAsesor = () => {
   const [showNuevaVisitaForm, setShowNuevaVisitaForm] = useState(false);
   const {
     visitas,
     loading,
-    filterType,
-    selectedDate,
-    setFilterType,
-    setSelectedDate,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate
   } = useFetchVisitas();
-  const MySwal = withReactContent(Swal)
-
-  const handleFilterTypeChange = (type) => {
-    setFilterType(type);
-  };
-
-  const handleDateChange = (date) => {
-    if (filterType === 'day') {
-      setSelectedDate(new Date(date));
-    } else {
-      // Para el filtro por mes, establecer el día al 1
-      const [year, month] = date.split('-');
-      setSelectedDate(new Date(year, month - 1, 1));
-    }
-  };
-
-  const handleNuevaVisita = (e) => {
-    e.preventDefault();
-    setShowNuevaVisitaForm(false);
-  };
-
-// Implementacion de Codigo para reprogramar o realizar visitas
+  const MySwal = withReactContent(Swal);
 
   const handleUpdateVisita = async (estado, visitaId) => {
     const {data, error} = await supabase
-    .from("visitas")
-    .update({estado}) //actualiza estado con el valor pasado
-    .eq("id", visitaId) //Id de la visita
-
+      .from("visitas")
+      .update({estado})
+      .eq("id", visitaId);
 
     if(error){
-      console.error("Error actualizando visita:", error)
-      MySwal.fire("Error", "Hubo un problema al actualizar la visita", "error")
+      console.error("Error actualizando visita:", error);
+      MySwal.fire("Error", "Hubo un problema al actualizar la visita", "error");
     } else {
-      MySwal.fire("Excelente", `la visita ha fue marcada como  ${estado}, la tele ya conoce esta informacion`, "success")
+      MySwal.fire("Excelente", `la visita ha fue marcada como ${estado}, la tele ya conoce esta informacion`, "success");
     }
-  // Esperar 2 segundos antes de recargar
-  setTimeout(() => {
-    window.location.reload();
-  }, 2000); // Tiempo en milisegundos
-
-  }
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
+  };
 
   return (
     <div className="p-4 mt-20">
@@ -67,38 +44,24 @@ import { supabase } from "../Functions/CreateClient";
         
         <div className="flex space-x-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Filtrar por:</label>
-            <select 
+            <label className="block text-sm font-medium text-gray-700">Fecha inicial:</label>
+            <input
+              type="date"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-              value={filterType}
-              onChange={(e) => handleFilterTypeChange(e.target.value)}
-            >
-              <option value="day">Día</option>
-              <option value="month">Mes</option>
-            </select>
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
           </div>
           
-          {filterType === 'day' ? (
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Seleccionar día:</label>
-          <input
-            type="date"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            value={selectedDate.toISOString().split('T')[0]}
-            onChange={(e) => handleDateChange(e.target.value)}
-          />
-        </div>
-      ) : (
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Seleccionar mes:</label>
-          <input
-            type="month"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            value={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`}
-            onChange={(e) => handleDateChange(e.target.value)}
-          />
-        </div>
-      )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Fecha final:</label>
+            <input
+              type="date"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
         </div>
 
         {loading ? (
@@ -109,28 +72,28 @@ import { supabase } from "../Functions/CreateClient";
               <li key={visita.id} className="border-b pb-2">
                 <p className="font-semibold">{visita.cliente}</p>
                 <p className="text-sm text-gray-600">
-             <span className="font-bold"> Cliente:  </span> {visita.nombre} 
-             <span className="font-bold"> Ciudad: </span> {visita.ciudad} 
-             <span className="font-bold"> Barrio: </span> {visita.barrio} 
-             <span className="font-bold"> Direccion: </span> {visita.direccion} 
-             <span className="font-bold text-green-500"> Hora: </span> {visita.hora} 
-             <span className="font-bold "> Referido de: </span> {visita.referido} 
+                  <span className="font-bold"> Cliente: </span> {visita.nombre} 
+                  <span className="font-bold"> Ciudad: </span> {visita.ciudad} 
+                  <span className="font-bold"> Barrio: </span> {visita.barrio} 
+                  <span className="font-bold"> Direccion: </span> {visita.direccion} 
+                  <span className="font-bold text-green-500"> Hora: </span> {visita.hora} 
+                  <span className="font-bold"> Referido de: </span> {visita.referido} 
                 </p>
 
                 <div className="py-2 flex justify-between">
-  <button className="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-500 transition duration-300 ease-in-out"
-  onClick={() => handleUpdateVisita("realizada", visita.id)}
-  >
-    Realizar
-  </button>
-  <button className="bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out"
-  onClick={() => handleUpdateVisita("realizada", visita.id)}
-  >
-    Reprogramar
-  </button>
-</div>
-  
-
+                  <button 
+                    className="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-500 transition duration-300 ease-in-out"
+                    onClick={() => handleUpdateVisita("realizada", visita.id)}
+                  >
+                    Realizar
+                  </button>
+                  <button 
+                    className="bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out"
+                    onClick={() => handleUpdateVisita("realizada", visita.id)}
+                  >
+                    Reprogramar
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

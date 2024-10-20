@@ -127,6 +127,12 @@ const Navbar = () => {
               Galeria
             </a>
             <a
+              href="/calculadora"
+              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
+            >
+              Calculadora
+            </a>
+            <a
               href="/contact"
               className="text-white hover:text-black py-2 px-4 text-center md:text-left"
             >
