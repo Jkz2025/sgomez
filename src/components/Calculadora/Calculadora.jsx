@@ -14,15 +14,41 @@ const Calculadora = () => {
         setSaldoFinanciar("")
         setIva("")
     }
- 
-  useEffect(() => {});
+   // Nueva función para formatear números con comas
+   const formatNumberWithCommas = (value) => {
+    // Eliminar cualquier caracter que no sea número
+    const numberOnly = value.replace(/[^\d]/g, '');
+    // Convertir a número y formatear con comas
+    return numberOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+   // Nueva función para quitar el formato antes de hacer cálculos
+   const parseFormattedNumber = (value) => {
+    // Eliminar las comas y convertir a número
+    return parseFloat(value.replace(/,/g, '')) || 0;
+  };
+
+  const handleValorTotalChange = (e) => {
+    const formattedValue = formatNumberWithCommas(e.target.value);
+    setValorTotal(formattedValue);
+  };
+
+  const handleCuotaInicialChange = (e) => {
+    const formattedValue = formatNumberWithCommas(e.target.value);
+    setCuotaInicial(formattedValue);
+  };
 
   const calcularFinanciacion = () => {
-    const ivaCalculado = valorTotal * 0.19;
-    const saldo = valorTotal - cuotaInicial;
-    setIva(ivaCalculado);
-    setSaldoFinanciar(saldo);
+    // Convertir los valores formateados a números antes de calcular
+    const valorTotalNumero = parseFormattedNumber(valorTotal);
+    const cuotaInicialNumero = parseFormattedNumber(cuotaInicial);
 
+    const ivaCalculado = valorTotalNumero * 0.19;
+    const saldo = valorTotalNumero - cuotaInicialNumero;
+    
+    // Formatear los resultados con comas
+    setIva(formatNumberWithCommas(ivaCalculado.toFixed(0)));
+    setSaldoFinanciar(formatNumberWithCommas(saldo.toFixed(0)));
     const nuevasCuotas = [
       { cantidad: 2, porcentaje: 51.53, cuotaMinima: saldo * 0.5153 },
       { cantidad: 3, porcentaje: 34.71, cuotaMinima: saldo * 0.3471 },
@@ -62,16 +88,16 @@ const Calculadora = () => {
             Valor Total
           </label>
           <input
-            type="number"
+            type="text"
             value={valorTotal}
-            onChange={(e) => setValorTotal((e.target.value))}
+            onChange={handleValorTotalChange}
             className="border p-2 w-full"
           />
         </div>
         <div className="mb-4">
           <label className="block mb-2">IVA:</label>
           <input
-            type="number"
+            type="text"
             value={iva}
             readOnly
             className="border p-2 w-full bg-gray-200"
@@ -82,9 +108,9 @@ const Calculadora = () => {
             Cuota Inicial:
           </label>
           <input
-            type="number"
+            type="text"
             value={cuotaInicial}
-            onChange={(e) => setCuotaInicial((e.target.value))}
+            onChange={(handleCuotaInicialChange)}
             className="border p-2 w-full"
           />
         </div>
@@ -93,7 +119,7 @@ const Calculadora = () => {
             Saldo a Financiar:
           </label>
           <input
-            type="number"
+            type="text"
             value={saldoFinanciar}
             readOnly
             className="border p-2 w-full bg-gray-200"
@@ -124,11 +150,13 @@ const Calculadora = () => {
           </thead>
           <tbody>
             {cuotas.map((cuota, index) => (
-              <tr key={index}>
-                <td className="border px-4 py-2">{cuota.cantidad}</td>
-                <td className="border px-4 py-2">{cuota.porcentaje}%</td>
-                <td className="border px-4 py-2">${cuota.cuotaMinima.toLocaleString()}</td>
-              </tr>
+               <tr key={index}>
+               <td className="border px-4 py-2">{cuota.cantidad}</td>
+               <td className="border px-4 py-2">{cuota.porcentaje}%</td>
+               <td className="border px-4 py-2">
+                 ${formatNumberWithCommas(cuota.cuotaMinima.toFixed(0))}
+               </td>
+             </tr>
             ))}
           </tbody>
         </table>
