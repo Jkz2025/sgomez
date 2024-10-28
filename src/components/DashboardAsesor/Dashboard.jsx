@@ -5,6 +5,9 @@ import withReactContent from "sweetalert2-react-content";
 import { supabase } from "../Functions/CreateClient";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "../../constants/AuthContext";
+
+
 const DashboardAsesor = () => {
   const navigate = useNavigate();
   const [showNuevaVisitaForm, setShowNuevaVisitaForm] = useState(false);
@@ -22,6 +25,7 @@ const DashboardAsesor = () => {
     setVisitas,
     setEndDate,
   } = useFetchVisitas();
+  const { session } = useAuth();
 
   const MySwal = withReactContent(Swal);
 
@@ -29,14 +33,27 @@ const DashboardAsesor = () => {
     fetchTodayStats();
   }, []);
 
-  const fetchTodayStats = async () => {
-    const today = new Date().toISOString().split("T")[0];
 
-    const { data: realizadas } = await supabase
-      .from("visitas")
-      .select("count")
-      .eq("estado", "realizada")
-      .eq("fecha", today);
+  const fetchTodayStats = async () => {
+      const today = new Date().toISOString().split("T")[0];
+  
+      // Obtener el usuario autenticado
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+          console.error("Error obteniendo usuario:", error);
+          return;
+      }
+  
+      const userId = user?.id; // ID del asesor autenticado
+      console.log("User ID:", userId); // Aquí puedes verificar si el ID está bien
+  
+      const { data: realizadas } = await supabase
+        .from("visitas")
+        .select("count")
+        .eq("estado", "realizada")
+        .eq("fecha", today)
+        .eq("asesor", userId); // Asegúrate de filtrar las visitas por el asesor
+  
 
     const { data: pendientes } = await supabase
       .from("visitas")
@@ -47,7 +64,7 @@ const DashboardAsesor = () => {
     const { data: reprogramadas } = await supabase
       .from("visitas")
       .select("count")
-      .eq("estado", "pendiente")
+      .eq("estado", "reprogramar")
       .eq("fecha", today);
 
     setStatsHoy({
@@ -57,6 +74,8 @@ const DashboardAsesor = () => {
     });
   };
 
+
+  //Funcion para almacenar la visita realizada
   const handleRealizarVisita = async (visita) => {
     // Confirmar inicial
     const confirmResult = await MySwal.fire({
@@ -116,13 +135,13 @@ const DashboardAsesor = () => {
       .from("visitas")
       .update({
         estado: "realizada",
-        detalles: detalles,
+        detalles_visita: detalles,
         valor_venta: valorVenta,
       })
       .eq("id", visita.id);
 
     if (error) {
-      MySwal.fite("Error", "Hubo un problema al actualizar la visita", "error");
+      MySwal.fire("Error", "Hubo un problema al actualizar la visita", error);
     } else {
       MySwal.fire(
         "Exito",
@@ -134,6 +153,7 @@ const DashboardAsesor = () => {
     }
   };
 
+  //Funcion para reprogramar la visita realizada
   const handleReprogramarVisita = async (visita) => {
     //Cofirmacion inicial
     const confirmResult = await MySwal.fire({
@@ -282,13 +302,13 @@ const DashboardAsesor = () => {
                 <div className="py-2 flex justify-between">
                   <button
                     className="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-500 transition duration-300 ease-in-out"
-                    onClick={() => handleUpdateVisita("realizada", visita.id)}
+                    onClick={() => handleRealizarVisita("realizada", visita.id)}
                   >
                     Realizar
                   </button>
                   <button
                     className="bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out"
-                    onClick={() => handleUpdateVisita("realizada", visita.id)}
+                    onClick={() => handleReprogramarVisita("reprogramada", visita.id)}
                   >
                     Reprogramar
                   </button>
