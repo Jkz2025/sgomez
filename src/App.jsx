@@ -66,19 +66,10 @@ import DashboardDistribuidor from './components/DashboardDistribuidor/Dashboard'
 import DashboardTeleventas from './components/DashboardTeleventas/Dashboard';
 import Calculadora from './components/Calculadora/Calculadora';
 import Dashboard from './components/Dashboard';
-import { supabase } from './components/Functions/CreateClient';
-import { useEffect } from 'react';
 
 function App() {
 
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-            // Redirigir al dashboard
-            window.location.href = '/login';
-        }
-    });
-}, []);
+ 
   return (
     <AuthProvider>
       <Router>
