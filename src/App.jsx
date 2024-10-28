@@ -74,7 +74,7 @@ function App() {
       <Router>
         <Navbar />
         <Routes>
-          <Route path="/" element={<LoginForm />} />
+          <Route path="/" element={<Navigate to="/login" replace />}/>
           <Route 
             path="/dashboard" 
             element={
@@ -83,7 +83,7 @@ function App() {
               </PrivateRoute>
             } 
           />
-          <Route path="/dashboard" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard"/>
           <Route path="/calculadora" element={<PrivateRoute>
             <Calculadora/>
           </PrivateRoute>} />
