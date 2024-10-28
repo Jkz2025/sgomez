@@ -1,13 +1,10 @@
 import { useFetchVisitas } from "./useFetchVisitas";
 import { useState, useEffect } from "react";
-import Swal from "sweetalert2";
 import { supabase } from "../Functions/CreateClient";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../constants/AuthContext";
+import Swal from "sweetalert2";
+// Import SweetAlert2 differently
 
 const DashboardAsesor = () => {
-  const navigate = useNavigate();
-  const [showNuevaVisitaForm, setShowNuevaVisitaForm] = useState(false);
   const [statsHoy, setStatsHoy] = useState({
     realizadas: 0,
     pendientes: 0,
@@ -22,7 +19,6 @@ const DashboardAsesor = () => {
     setVisitas,
     setEndDate,
   } = useFetchVisitas();
-  const { session } = useAuth();
 
   useEffect(() => {
     fetchTodayStats();
@@ -64,46 +60,37 @@ const DashboardAsesor = () => {
 
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
-      await Swal.fire({
-        title: "Error",
-        text: "No se pudieron cargar las estadísticas",
-        icon: "error"
-      });
+      Swal.fire("Error", "No se pudieron cargar las estadísticas", "error");
     }
   };
 
   const handleRealizarVisita = async (visita) => {
     try {
-      // Confirmar inicial
-      const confirmResult = await Swal.fire({
-        title: "¿Está seguro que desea marcar la visita como realizada?",
+      const willProceed = await Swal.fire({
+        title: "Confirmar",
+        text: "¿Está seguro que desea marcar la visita como realizada?",
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Sí",
         cancelButtonText: "No"
       });
 
-      if (!confirmResult.isConfirmed) return;
+      if (!willProceed.isConfirmed) return;
 
-      // Solicitar observaciones
-      const observacionResult = await Swal.fire({
-        title: "Observación de la visita",
+      const observacionInput = await Swal.fire({
+        title: "Observación",
+        text: "Ingrese los detalles de la visita",
         input: "textarea",
-        inputLabel: "Detalles",
-        inputPlaceholder: "Escriba los detalles de la visita...",
         showCancelButton: true,
-        inputValidator: (value) => {
-          if (!value) return "Por favor ingrese una observación";
-          return null;
-        }
+        inputValidator: (value) => !value && "Por favor ingrese una observación"
       });
 
-      if (!observacionResult.isConfirmed) return;
-      const detalles = observacionResult.value;
+      if (!observacionInput.isConfirmed) return;
+      const detalles = observacionInput.value;
 
-      // Preguntar por venta
-      const ventaResult = await Swal.fire({
-        title: "¿Hubo venta?",
+      const huboVenta = await Swal.fire({
+        title: "Venta",
+        text: "¿Hubo venta en esta visita?",
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Sí",
@@ -111,18 +98,17 @@ const DashboardAsesor = () => {
       });
 
       let valorVenta = null;
-      if (ventaResult.isConfirmed) {
-        const valorResult = await Swal.fire({
-          title: "Valor de la venta",
+      if (huboVenta.isConfirmed) {
+        const valorInput = await Swal.fire({
+          title: "Valor",
+          text: "Ingrese el valor de la venta",
           input: "number",
-          inputLabel: "Por favor indique el valor de la venta",
-          inputValidator: (value) => {
-            if (!value || value <= 0) return "Por favor ingrese un valor válido";
-            return null;
-          }
+          inputValidator: (value) => !value && "Por favor ingrese un valor"
         });
-        if (!valorResult.isConfirmed) return;
-        valorVenta = parseFloat(valorResult.value);
+
+        if (valorInput.isConfirmed) {
+          valorVenta = parseFloat(valorInput.value);
+        }
       }
 
       // Actualizar en Supabase
@@ -138,20 +124,27 @@ const DashboardAsesor = () => {
 
       if (error) throw error;
 
+      // Actualizar el estado local inmediatamente
+      setVisitas(prevVisitas => prevVisitas.filter(v => v.id !== visita.id));
+      
+      // Actualizar estadísticas
+      setStatsHoy(prev => ({
+        ...prev,
+        realizadas: prev.realizadas + 1,
+        pendientes: prev.pendientes - 1
+      }));
+
       await Swal.fire({
         title: "Éxito",
-        text: "La visita ha sido marcada como realizada",
+        text: "Visita marcada como realizada",
         icon: "success"
       });
-      
-      setVisitas(prev => prev.filter(v => v.id !== visita.id));
-      await fetchTodayStats();
 
     } catch (error) {
       console.error("Error al realizar la visita:", error);
       await Swal.fire({
         title: "Error",
-        text: "Hubo un problema al actualizar la visita",
+        text: "No se pudo actualizar la visita",
         icon: "error"
       });
     }
@@ -159,65 +152,69 @@ const DashboardAsesor = () => {
 
   const handleReprogramarVisita = async (visita) => {
     try {
-      const confirmResult = await Swal.fire({
-        title: "¿Está seguro que desea reprogramar la visita?",
+      const willReprogam = await Swal.fire({
+        title: "Confirmar",
+        text: "¿Está seguro que desea reprogramar la visita?",
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Sí",
         cancelButtonText: "No"
       });
 
-      if (!confirmResult.isConfirmed) return;
+      if (!willReprogam.isConfirmed) return;
 
-      const motivoResult = await Swal.fire({
-        title: "¿Por qué se reprogramó la visita?",
+      const motivoInput = await Swal.fire({
+        title: "Motivo",
+        text: "¿Por qué se reprograma la visita?",
         input: "textarea",
-        inputLabel: "Detalles",
-        inputPlaceholder: "Escriba el motivo de la reprogramación...",
-        showCancelButton: true,
-        inputValidator: (value) => {
-          if (!value) return "Por favor ingrese el motivo";
-          return null;
-        }
+        inputValidator: (value) => !value && "Por favor ingrese el motivo"
       });
 
-      if (!motivoResult.isConfirmed) return;
+      if (!motivoInput.isConfirmed) return;
 
       const { error } = await supabase
         .from("visitas")
         .update({
           estado: "reprogramada",
-          detalles: motivoResult.value,
+          detalles: motivoInput.value,
           fecha_reprogramacion: new Date().toISOString()
         })
         .eq("id", visita.id);
 
       if (error) throw error;
 
+      // Actualizar el estado local inmediatamente
+      setVisitas(prevVisitas => prevVisitas.filter(v => v.id !== visita.id));
+      
+      // Actualizar estadísticas
+      setStatsHoy(prev => ({
+        ...prev,
+        reprogramadas: prev.reprogramadas + 1,
+        pendientes: prev.pendientes - 1
+      }));
+
       await Swal.fire({
         title: "Éxito",
-        text: "La visita ha sido reprogramada",
+        text: "Visita reprogramada correctamente",
         icon: "success"
       });
-      
-      setVisitas(prev => prev.filter(v => v.id !== visita.id));
-      await fetchTodayStats();
 
     } catch (error) {
       console.error("Error al reprogramar la visita:", error);
       await Swal.fire({
         title: "Error",
-        text: "Hubo un problema al reprogramar la visita",
+        text: "No se pudo reprogramar la visita",
         icon: "error"
       });
     }
   };
 
+
   return (
     <div className="p-4 mt-20">
       <h1 className="text-2xl font-bold mb-4">Dashboard Asesor</h1>
 
-      {/* Estadísticas diarias */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-green-100 p-4 rounded-lg shadow">
           <h3 className="text-green-800 font-semibold">Visitas Realizadas</h3>
@@ -226,7 +223,7 @@ const DashboardAsesor = () => {
           </p>
         </div>
         <div className="bg-yellow-100 p-4 rounded-lg shadow">
-          <h3 className="text-yellow-500 font-semibold">Visitas Pendientes</h3>
+          <h3 className="text-yellow-800 font-semibold">Visitas Pendientes</h3>
           <p className="text-2xl font-bold text-yellow-600">
             {statsHoy.pendientes}
           </p>
@@ -241,6 +238,7 @@ const DashboardAsesor = () => {
         </div>
       </div>
 
+      {/* Visits List */}
       <div className="bg-white p-4 rounded-lg shadow mb-4">
         <h2 className="text-xl font-semibold mb-2">Visitas Pendientes</h2>
 
@@ -256,7 +254,6 @@ const DashboardAsesor = () => {
               onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Fecha final:
@@ -278,14 +275,13 @@ const DashboardAsesor = () => {
               <li key={visita.id} className="border-b pb-2">
                 <p className="font-semibold">{visita.cliente}</p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-bold"> Cliente: </span> {visita.nombre}
-                  <span className="font-bold"> Ciudad: </span> {visita.ciudad}
-                  <span className="font-bold"> Barrio: </span> {visita.barrio}
-                  <span className="font-bold"> Direccion: </span> {visita.direccion}
-                  <span className="font-bold text-green-500"> Hora: </span> {visita.hora}
-                  <span className="font-bold"> Referido de: </span> {visita.referido}
+                  <span className="font-bold">Cliente: </span> {visita.nombre}
+                  <span className="font-bold ml-2">Ciudad: </span> {visita.ciudad}
+                  <span className="font-bold ml-2">Barrio: </span> {visita.barrio}
+                  <span className="font-bold ml-2">Direccion: </span> {visita.direccion}
+                  <span className="font-bold ml-2 text-green-500">Hora: </span> {visita.hora}
+                  <span className="font-bold ml-2">Referido de: </span> {visita.referido}
                 </p>
-
                 <div className="py-2 flex justify-between">
                   <button
                     className="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-500 transition duration-300 ease-in-out"
