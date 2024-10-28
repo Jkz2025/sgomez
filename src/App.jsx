@@ -75,15 +75,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />}/>
-          <Route 
-            path="/dashboard" 
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            } 
-          />
-          <Route path="/dashboard"/>
+    
           <Route path="/calculadora" element={<PrivateRoute>
             <Calculadora/>
           </PrivateRoute>} />
