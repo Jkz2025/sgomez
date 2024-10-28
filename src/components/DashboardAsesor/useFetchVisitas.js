@@ -37,6 +37,7 @@ export const useFetchVisitas = () => {
     startDate,
     endDate,
     setStartDate,
-    setEndDate
+    setEndDate,
+    setVisitas 
   };
 };
