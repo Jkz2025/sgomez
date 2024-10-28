@@ -35,173 +35,171 @@ const DashboardAsesor = () => {
 
 
   const fetchTodayStats = async () => {
-      const today = new Date().toISOString().split("T")[0];
-  
-      // Obtener el usuario autenticado
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-          console.error("Error obteniendo usuario:", error);
-          return;
-      }
-  
-      const userId = user?.id; // ID del asesor autenticado
-      console.log("User ID:", userId); // Aquí puedes verificar si el ID está bien
-  
-      const { data: realizadas } = await supabase
-        .from("visitas")
-        .select("count")
-        .eq("estado", "realizada")
-        .eq("fecha", today)
-        .eq("asesor", userId); // Asegúrate de filtrar las visitas por el asesor
-  
+    try {
+        const today = new Date().toISOString().split("T")[0];
+        
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
 
-    const { data: pendientes } = await supabase
-      .from("visitas")
-      .select("count")
-      .eq("estado", "pendiente")
-      .eq("fecha", today);
+        const userId = user?.id;
+        if (!userId) throw new Error("No se encontró ID de usuario");
 
-    const { data: reprogramadas } = await supabase
-      .from("visitas")
-      .select("count")
-      .eq("estado", "reprogramar")
-      .eq("fecha", today);
+        const fetchCount = async (estado) => {
+            const { data, error } = await supabase
+                .from("visitas")
+                .select("count")
+                .eq("estado", estado)
+                .eq("fecha", today)
+                .eq("asesor", userId);
+            
+            if (error) throw error;
+            return data?.[0]?.count || 0;
+        };
 
-    setStatsHoy({
-      realizadas: realizadas?.[0]?.count || 0,
-      pendientes: pendientes?.[0]?.count || 0,
-      reprogramadas: reprogramadas?.[0]?.count || 0,
-    });
-  };
+        const [realizadas, pendientes, reprogramadas] = await Promise.all([
+            fetchCount("realizada"),
+            fetchCount("pendiente"),
+            fetchCount("reprogramar")
+        ]);
+
+        setStatsHoy({
+            realizadas,
+            pendientes,
+            reprogramadas
+        });
+
+    } catch (error) {
+        console.error("Error al obtener estadísticas:", error);
+        await MySwal.fire("Error", "No se pudieron cargar las estadísticas", "error");
+    }
+};
 
 
   //Funcion para almacenar la visita realizada
   const handleRealizarVisita = async (visita) => {
-    // Confirmar inicial
-    const confirmResult = await MySwal.fire({
-      title: "¿Esta seguro que desea marcar la visita como realizada?",
-      showCancelButton: true,
-      confirmButtonText: "Si",
-      cancelButtonText: "No",
-      icon: "question",
-    });
+    try {
+        // Confirmar inicial
+        const confirmResult = await MySwal.fire({
+            title: "¿Está seguro que desea marcar la visita como realizada?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí",
+            cancelButtonText: "No"
+        });
 
-    if (!confirmResult.isConfirmed) return;
+        if (!confirmResult.isConfirmed) return;
 
-    // Solicitar observaciones
-    const observacionResult = await MySwal.fire({
-      title: "Observacion de la visita",
-      input: "textarea",
-      inputLabel: "Detalles",
-      inputPlaceholder: "Escriba los detalles de la visita...",
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (!value) {
-          return "Por favor ingrese una observacion";
+        // Solicitar observaciones
+        const observacionResult = await MySwal.fire({
+            title: "Observación de la visita",
+            input: "textarea",
+            inputLabel: "Detalles",
+            inputPlaceholder: "Escriba los detalles de la visita...",
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) return "Por favor ingrese una observación";
+            }
+        });
+
+        if (!observacionResult.isConfirmed) return;
+        const detalles = observacionResult.value;
+
+        // Preguntar por venta
+        const ventaResult = await MySwal.fire({
+            title: "¿Hubo venta?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí",
+            cancelButtonText: "No"
+        });
+
+        let valorVenta = null;
+        if (ventaResult.isConfirmed) {
+            const valorResult = await MySwal.fire({
+                title: "Valor de la venta",
+                input: "number",
+                inputLabel: "Por favor indique el valor de la venta",
+                inputValidator: (value) => {
+                    if (!value || value <= 0) return "Por favor ingrese un valor válido";
+                }
+            });
+            if (!valorResult.isConfirmed) return;
+            valorVenta = parseFloat(valorResult.value);
         }
-      },
-    });
 
-    if (!observacionResult.isConfirmed) return;
-    const detalles = observacionResult.value;
+        // Actualizar en Supabase
+        const { error } = await supabase
+            .from("visitas")
+            .update({
+                estado: "realizada",
+                detalles_visita: detalles,
+                valor_venta: valorVenta,
+                fecha_realizacion: new Date().toISOString()
+            })
+            .eq("id", visita.id);
 
-    //Preguntar por venta
-    const ventaResult = await MySwal.fire({
-      title: "¿Hubo venta?",
-      showCancelButton: true,
-      confirmButtonText: "Si",
-      cancelButtonText: "No",
-      icon: "question",
-    });
+        if (error) throw error;
 
-    let valorVenta = null;
-    if (ventaResult.isConfirmed) {
-      const valorResult = await MySwal.fire({
-        title: "Valor de la venta",
-        input: "number",
-        inputLabel: "Por favor indique el valor de la venta",
-        inputValidator: (value) => {
-          if (!value || value <= 0) {
-            return "Por favor ingrese un valor valido";
-          }
-        },
-      });
-      if (!valorResult.isConfirmed) return;
-      valorVenta = valorResult.value;
+        await MySwal.fire("Éxito", "La visita ha sido marcada como realizada", "success");
+        setVisitas(prev => prev.filter(v => v.id !== visita.id));
+        await fetchTodayStats();
+
+    } catch (error) {
+        console.error("Error al realizar la visita:", error);
+        await MySwal.fire("Error", "Hubo un problema al actualizar la visita", "error");
     }
+};
 
-    //Actualizar en supabase
-    const { error } = await supabase
-      .from("visitas")
-      .update({
-        estado: "realizada",
-        detalles_visita: detalles,
-        valor_venta: valorVenta,
-      })
-      .eq("id", visita.id);
-
-    if (error) {
-      MySwal.fire("Error", "Hubo un problema al actualizar la visita", error);
-    } else {
-      MySwal.fire(
-        "Exito",
-        "La visita ha sido marcada como realizada",
-        "success"
-      );
-      setVisitas(visitas.filter((v) => v.id !== visita.id));
-      fetchTodayStats();
-    }
-  };
 
   //Funcion para reprogramar la visita realizada
   const handleReprogramarVisita = async (visita) => {
-    //Cofirmacion inicial
-    const confirmResult = await MySwal.fire({
-      title: "¿Esta seguro que desea reprogramar la visita?",
-      showCancelButton: true,
-      confirmButtonText: "Si",
-      cancelButtonText: "No",
-      icon: "question",
-    });
+    try {
+        // Confirmación inicial
+        const confirmResult = await MySwal.fire({
+            title: "¿Está seguro que desea reprogramar la visita?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí",
+            cancelButtonText: "No"
+        });
 
-    if (!confirmResult.isConfirmed) return;
+        if (!confirmResult.isConfirmed) return;
 
-    //Solicitar Motivo
-    const motivoResult = await MySwal.fire({
-      title: "¿Por que se reprogramo la visita?",
-      input: "textarea",
-      inputLabel: "Detalles",
-      inputPlaceholder: "Escriba el motivo de la reprogramacion...",
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (!value) {
-          return "Por favor ingrese el motivo";
-        }
-      },
-    });
-    if (!motivoResult.isConfirmed) return;
+        // Solicitar motivo
+        const motivoResult = await MySwal.fire({
+            title: "¿Por qué se reprogramó la visita?",
+            input: "textarea",
+            inputLabel: "Detalles",
+            inputPlaceholder: "Escriba el motivo de la reprogramación...",
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) return "Por favor ingrese el motivo";
+            }
+        });
 
-    //Actualizar en Supabase
-    const { error } = await supabase
-      .from("visitas")
-      .update({
-        estado: "reprogramada",
-        detalles: motivoResult.value,
-      })
-      .eq("id", visita.id);
+        if (!motivoResult.isConfirmed) return;
 
-    if (error) {
-      MySwal.fire(
-        "Error",
-        "Hubo un problema al reprogramar la visita",
-        "error"
-      );
-    } else {
-      MySwal.fire("Exito", "La visita ha sido reprogramada", "success");
-      setVisitas(visitas.filter((v) => v.id !== visita.id));
-      fetchTodayStats();
+        // Actualizar en Supabase
+        const { error } = await supabase
+            .from("visitas")
+            .update({
+                estado: "reprogramada",
+                detalles: motivoResult.value,
+                fecha_reprogramacion: new Date().toISOString()
+            })
+            .eq("id", visita.id);
+
+        if (error) throw error;
+
+        await MySwal.fire("Éxito", "La visita ha sido reprogramada", "success");
+        setVisitas(prev => prev.filter(v => v.id !== visita.id));
+        await fetchTodayStats();
+
+    } catch (error) {
+        console.error("Error al reprogramar la visita:", error);
+        await MySwal.fire("Error", "Hubo un problema al reprogramar la visita", "error");
     }
-  };
+};
 
   // const handleUpdateVisita = async (estado, visitaId) => {
   //   const { data, error } = await supabase
@@ -302,13 +300,13 @@ const DashboardAsesor = () => {
                 <div className="py-2 flex justify-between">
                   <button
                     className="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-500 transition duration-300 ease-in-out"
-                    onClick={() => handleRealizarVisita("realizada", visita.id)}
+                    onClick={() => handleRealizarVisita(visita)}
                   >
                     Realizar
                   </button>
                   <button
                     className="bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out"
-                    onClick={() => handleReprogramarVisita("reprogramada", visita.id)}
+                    onClick={() => handleReprogramarVisita(visita)}
                   >
                     Reprogramar
                   </button>
