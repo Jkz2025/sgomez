@@ -57,7 +57,6 @@
 
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider } from './constants/AuthContext';
-import Dashboard from './components/Dashboard';
 import LoginForm from './components/LoginForm';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
