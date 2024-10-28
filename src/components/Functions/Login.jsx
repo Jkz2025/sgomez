@@ -3,24 +3,26 @@ import Button from "../Button";
 
 
 const Login = () => {
+  async function signInWithGoogle() {
+      try {
+          const { data, error } = await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                  skipBrowserRedirect: false, // Importante: asegura la redirección del navegador
+                  redirectTo: `${window.location.origin}/dashboard`,
+                  queryParams: {
+                      prompt: 'select_account', // Fuerza a mostrar el selector de cuenta
+                      access_type: 'offline'
+                  }
+              }
+          });
 
-
-    async function signInWithGoogle() {
-    
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'http://localhost:5173/dashboard'
-        }
-      });
-    
-    
-      if (error) {
-        console.error("Error signing in With Google:", error);
-      } else {
-        console.log("Sing in data:", data); 
+          if (error) throw error;
+      } catch (error) {
+          console.error("Error en inicio de sesión con Google:", error.message);
       }
-    }
+  }
+
 
   return (
     <div className='mt-4'>
