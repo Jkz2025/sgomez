@@ -66,6 +66,7 @@ const DashboardAsesor = () => {
 
   const handleRealizarVisita = async (visita) => {
     try {
+      // Simple confirmation dialog
       const willProceed = await Swal.fire({
         title: "Confirmar",
         text: "¿Está seguro que desea marcar la visita como realizada?",
@@ -77,6 +78,7 @@ const DashboardAsesor = () => {
 
       if (!willProceed.isConfirmed) return;
 
+      // Get observation details
       const observacionInput = await Swal.fire({
         title: "Observación",
         text: "Ingrese los detalles de la visita",
@@ -88,6 +90,7 @@ const DashboardAsesor = () => {
       if (!observacionInput.isConfirmed) return;
       const detalles = observacionInput.value;
 
+      // Ask about sale
       const huboVenta = await Swal.fire({
         title: "Venta",
         text: "¿Hubo venta en esta visita?",
@@ -111,7 +114,7 @@ const DashboardAsesor = () => {
         }
       }
 
-      // Actualizar en Supabase
+      // Update in database
       const { error } = await supabase
         .from("visitas")
         .update({
@@ -124,34 +127,19 @@ const DashboardAsesor = () => {
 
       if (error) throw error;
 
-      // Actualizar el estado local inmediatamente
-      setVisitas(prevVisitas => prevVisitas.filter(v => v.id !== visita.id));
-      
-      // Actualizar estadísticas
-      setStatsHoy(prev => ({
-        ...prev,
-        realizadas: prev.realizadas + 1,
-        pendientes: prev.pendientes - 1
-      }));
-
-      await Swal.fire({
-        title: "Éxito",
-        text: "Visita marcada como realizada",
-        icon: "success"
-      });
+      Swal.fire("Éxito", "Visita marcada como realizada", "success");
+      setVisitas(prev => prev.filter(v => v.id !== visita.id));
+      await fetchTodayStats();
 
     } catch (error) {
       console.error("Error al realizar la visita:", error);
-      await Swal.fire({
-        title: "Error",
-        text: "No se pudo actualizar la visita",
-        icon: "error"
-      });
+      Swal.fire("Error", "No se pudo actualizar la visita", "error");
     }
   };
 
   const handleReprogramarVisita = async (visita) => {
     try {
+      // Confirmation
       const willReprogam = await Swal.fire({
         title: "Confirmar",
         text: "¿Está seguro que desea reprogramar la visita?",
@@ -163,6 +151,7 @@ const DashboardAsesor = () => {
 
       if (!willReprogam.isConfirmed) return;
 
+      // Get reason
       const motivoInput = await Swal.fire({
         title: "Motivo",
         text: "¿Por qué se reprograma la visita?",
@@ -172,6 +161,7 @@ const DashboardAsesor = () => {
 
       if (!motivoInput.isConfirmed) return;
 
+      // Update in database
       const { error } = await supabase
         .from("visitas")
         .update({
@@ -183,32 +173,15 @@ const DashboardAsesor = () => {
 
       if (error) throw error;
 
-      // Actualizar el estado local inmediatamente
-      setVisitas(prevVisitas => prevVisitas.filter(v => v.id !== visita.id));
-      
-      // Actualizar estadísticas
-      setStatsHoy(prev => ({
-        ...prev,
-        reprogramadas: prev.reprogramadas + 1,
-        pendientes: prev.pendientes - 1
-      }));
-
-      await Swal.fire({
-        title: "Éxito",
-        text: "Visita reprogramada correctamente",
-        icon: "success"
-      });
+      Swal.fire("Éxito", "Visita reprogramada correctamente", "success");
+      setVisitas(prev => prev.filter(v => v.id !== visita.id));
+      await fetchTodayStats();
 
     } catch (error) {
       console.error("Error al reprogramar la visita:", error);
-      await Swal.fire({
-        title: "Error",
-        text: "No se pudo reprogramar la visita",
-        icon: "error"
-      });
+      Swal.fire("Error", "No se pudo reprogramar la visita", "error");
     }
   };
-
 
   return (
     <div className="p-4 mt-20">
