@@ -2,7 +2,6 @@ import { useFetchVisitas } from "./useFetchVisitas";
 import { useState, useEffect } from "react";
 import { supabase } from "../Functions/CreateClient";
 import Swal from "sweetalert2";
-// Import SweetAlert2 differently
 
 const DashboardAsesor = () => {
   const [statsHoy, setStatsHoy] = useState({
