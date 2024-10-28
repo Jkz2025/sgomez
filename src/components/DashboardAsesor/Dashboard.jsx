@@ -21,7 +21,7 @@ const DashboardAsesor = () => {
 
   useEffect(() => {
     fetchTodayStats();
-  }, []);
+  }, [startDate, endDate]);
 
   const fetchTodayStats = async () => {
     try {
@@ -38,7 +38,8 @@ const DashboardAsesor = () => {
           .from("visitas")
           .select("count")
           .eq("estado", estado)
-          .eq("fecha", today)
+          .gte("fecha", startDate)
+          .lte("fecha", `${endDate} 23:59:59`)
           .eq("asesor", userId);
         
         if (error) throw error;
@@ -250,20 +251,19 @@ const DashboardAsesor = () => {
                   <span className="font-bold">Cliente: </span> {visita.nombre}
                   <span className="font-bold ml-2">Ciudad: </span> {visita.ciudad}
                   <span className="font-bold ml-2">Barrio: </span> {visita.barrio}
-                  <span className="font-bold ml-2">Direccion: </span> {visita.direccion}
-                  <span className="font-bold ml-2 text-green-500">Hora: </span> {visita.hora}
-                  <span className="font-bold ml-2">Referido de: </span> {visita.referido}
+                  <span className="font-bold ml-2">Dirección: </span> {visita.direccion}
+                  <span className="font-bold ml-2">Teléfono: </span> {visita.telefono}
                 </p>
-                <div className="py-2 flex justify-between">
+                <div className="flex space-x-2 mt-2">
                   <button
-                    className="bg-green-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-500 transition duration-300 ease-in-out"
                     onClick={() => handleRealizarVisita(visita)}
+                    className="bg-blue-500 text-white rounded px-3 py-1"
                   >
-                    Realizar
+                    Marcar como Realizada
                   </button>
                   <button
-                    className="bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out"
                     onClick={() => handleReprogramarVisita(visita)}
+                    className="bg-yellow-500 text-white rounded px-3 py-1"
                   >
                     Reprogramar
                   </button>
@@ -272,7 +272,7 @@ const DashboardAsesor = () => {
             ))}
           </ul>
         ) : (
-          <p>No hay visitas pendientes para este período.</p>
+          <p>No hay visitas pendientes en este rango de fechas.</p>
         )}
       </div>
     </div>
