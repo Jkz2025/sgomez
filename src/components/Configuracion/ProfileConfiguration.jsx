@@ -9,7 +9,7 @@ const ProfileConfiguration = () => {
     correo: "",
     telefono: "",
     cargo: "",
-    distribuidor: "",
+    distribucion: "",
     avatar_url: null,
   });
   const [userId, setUserId] = useState(null);
@@ -31,13 +31,12 @@ const ProfileConfiguration = () => {
       }
       if (user?.id) {
         setUserId(user.id);
-        fetchProfileData(user.id); // Llamamos a fetchProfileData aquí
+        fetchProfileData(user.id);
       }
     };
-    fetchUserId(); // Aquí faltaba los paréntesis para ejecutar la función
+    fetchUserId();
   }, []);
 
-  //Funcion para cargar datos del perfil
   const fetchProfileData = async (id) => {
     try {
       const { data, error } = await supabase
@@ -58,14 +57,15 @@ const ProfileConfiguration = () => {
             .getPublicUrl(data.avatar_url.split('/').pop());
           avatarUrl = publicUrl;
         }
+
         setProfile({
           nombre: data.nombre || "",
           apellido: data.apellido || "",
           correo: data.correo || "",
           telefono: data.telefono || "",
           cargo: data.cargo || "",
-          distribuidor: data.distribuidor || "",
-     avatar_url: avatarUrl
+          distribucion: data.distribucion || "",
+          avatar_url: avatarUrl
         });
         setAvatarPreview(avatarUrl);
       }
@@ -162,8 +162,8 @@ const ProfileConfiguration = () => {
     }
   };
 
- // Función para comprobar si una URL es válida
- const isValidUrl = (url) => {
+  // Función para comprobar si una URL es válida
+  const isValidUrl = (url) => {
     if (!url) return false;
     try {
       new URL(url);
@@ -185,7 +185,7 @@ const ProfileConfiguration = () => {
             onChange={handleAvatarChange}
           />
 
-<label htmlFor="avatarUpload" className="cursor-pointer">
+          <label htmlFor="avatarUpload" className="cursor-pointer">
             {avatarPreview && isValidUrl(avatarPreview) ? (
               <img
                 src={avatarPreview}
@@ -207,6 +207,7 @@ const ProfileConfiguration = () => {
           </label>
         </div>
 
+        {/* El resto del código del return permanece igual */}
         <div className="space-y-4">
           {/* Nombre completo no editable */}
           <div>
@@ -269,7 +270,7 @@ const ProfileConfiguration = () => {
             </label>
             <input
               type="text"
-              value={profile.distribuidor}
+              value={profile.distribucion}
               readOnly
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 cursor-not-allowed"
             />
