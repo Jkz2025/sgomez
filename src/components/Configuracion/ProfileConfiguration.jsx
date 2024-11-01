@@ -49,6 +49,15 @@ const ProfileConfiguration = () => {
       if (error) throw error;
 
       if (data) {
+        // Obtener la URL pública de la imagen si existe
+        let avatarUrl = null;
+        if (data.avatar_url) {
+          const { data: { publicUrl } } = supabase
+            .storage
+            .from('avatars')
+            .getPublicUrl(data.avatar_url.split('/').pop());
+          avatarUrl = publicUrl;
+        }
         setProfile({
           nombre: data.nombre || "",
           apellido: data.apellido || "",
@@ -56,9 +65,9 @@ const ProfileConfiguration = () => {
           telefono: data.telefono || "",
           cargo: data.cargo || "",
           distribuidor: data.distribuidor || "",
-          avatar_url: data.avatar_url
+     avatar_url: avatarUrl
         });
-        setAvatarPreview(data.avatar_url);
+        setAvatarPreview(avatarUrl);
       }
     } catch (error) {
       console.error("Error cargando perfil:", error);
@@ -98,7 +107,7 @@ const ProfileConfiguration = () => {
         const oldFilePath = profile.avatar_url.split('/').pop();
         await supabase.storage
           .from("avatars")
-          .remove([`avatars/${oldFilePath}`]);
+          .remove([oldFilePath]);
       }
 
       // Subimos la nueva imagen
@@ -108,20 +117,21 @@ const ProfileConfiguration = () => {
 
       if (uploadError) throw uploadError;
 
-      const {
-        data: { publicUrl },
-        error: urlError,
-      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      // Obtener la URL pública
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from("avatars")
+        .getPublicUrl(filePath);
 
-      if (urlError) throw urlError;
-
+      // Actualizar el perfil con la ruta del archivo
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: filePath }) // Guardamos la ruta relativa
         .eq("id", userId);
 
       if (updateError) throw updateError;
 
+      // Actualizar estados locales con la URL pública
       setProfile(prev => ({
         ...prev,
         avatar_url: publicUrl
@@ -152,6 +162,17 @@ const ProfileConfiguration = () => {
     }
   };
 
+ // Función para comprobar si una URL es válida
+ const isValidUrl = (url) => {
+    if (!url) return false;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 max-w-md mt-20">
       <div className="bg-white shadow-md rounded-lg p-6">
@@ -164,12 +185,16 @@ const ProfileConfiguration = () => {
             onChange={handleAvatarChange}
           />
 
-          <label htmlFor="avatarUpload" className="cursor-pointer">
-            {avatarPreview ? (
+<label htmlFor="avatarUpload" className="cursor-pointer">
+            {avatarPreview && isValidUrl(avatarPreview) ? (
               <img
                 src={avatarPreview}
                 alt="Avatar"
                 className="w-32 h-32 rounded-full object-cover"
+                onError={(e) => {
+                  console.error("Error loading image:", e);
+                  setAvatarPreview(null);
+                }}
               />
             ) : (
               <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
