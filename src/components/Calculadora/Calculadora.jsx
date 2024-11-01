@@ -43,7 +43,7 @@ const Calculadora = () => {
     const valorTotalNumero = parseFormattedNumber(valorTotal);
     const cuotaInicialNumero = parseFormattedNumber(cuotaInicial);
 
-    const ivaCalculado = valorTotalNumero * 0.19;
+    const ivaCalculado = valorTotalNumero / 1.19 - valorTotalNumero;
     const saldo = valorTotalNumero - cuotaInicialNumero;
     
     // Formatear los resultados con comas
@@ -143,7 +143,7 @@ const Calculadora = () => {
         <table className="table-auto w-full mt-4">
           <thead>
             <tr>
-              <th className="px-4 py-2">Cantidad</th>
+              <th className="px-4 py-2">Numero Cuotas</th>
               <th className="px-4 py-2">% Financiacion</th>
               <th className="px-4 py-2">Cuota Minima</th>
             </tr>
