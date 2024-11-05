@@ -121,7 +121,7 @@ const Navbar = () => {
               Catalogo
             </a>
             <a
-              href="/about"
+              href="/Galeria"
               className="text-white hover:text-black py-2 px-4 text-center md:text-left"
             >
               Galeria
