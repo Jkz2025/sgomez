@@ -76,16 +76,15 @@ function App() {
           {/* <Route path="/" element={<Navigate to="/login" replace />}/> */}
 
           <Route path="/login" element={<LoginForm />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
           <Route
             path="/ProfileConfiguration"
             element={
               <PrivateRoute>
-                <Calculadora />
+                <ProfileConfiguration />
               </PrivateRoute>
             }
           />
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
           <Route
             path="/calculadora"
@@ -133,16 +132,6 @@ function App() {
             element={
               <PrivateRoute>
                 <DashboardTeleventas />
-              </PrivateRoute>
-            }
-          />
-
-          <ProfileConfiguration />
-          <Route
-            path="/ProfileConfiguration"
-            element={
-              <PrivateRoute>
-                <ProfileConfiguration />{" "}
               </PrivateRoute>
             }
           />
