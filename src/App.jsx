@@ -81,7 +81,6 @@ function App() {
           <Route path="/calculadora" element={<PrivateRoute>
             <Calculadora/>
           </PrivateRoute>} />
-           <Route path="/ProfileConfiguration" element={<ProfileConfiguration />} />
 
           <Route path="/catalogo" element={<PrivateRoute>
             <Inventario/>
@@ -98,6 +97,11 @@ function App() {
           <Route path="/dashboard-televentas" element={<PrivateRoute>
             <DashboardTeleventas/>
           </PrivateRoute>} />
+          <Route path="/ProfileConfiguration" element={
+            <PrivateRoute>
+            <ProfileConfiguration /> 
+            </PrivateRoute> }/>
+
         </Routes>
       </Router>
       </AuthProvider>
