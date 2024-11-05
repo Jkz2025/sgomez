@@ -9,7 +9,7 @@ const ProfileConfiguration = () => {
     correo: "",
     telefono: "",
     cargo: "",
-    distribucion: "",
+    distribuidor: "",
     avatar_url: null,
   });
   const [userId, setUserId] = useState(null);
@@ -64,7 +64,7 @@ const ProfileConfiguration = () => {
           correo: data.correo || "",
           telefono: data.telefono || "",
           cargo: data.cargo || "",
-          distribucion: data.distribucion || "",
+          distribuidor: data.distribuidor || "",
           avatar_url: avatarUrl
         });
         setAvatarPreview(avatarUrl);
@@ -270,7 +270,7 @@ const ProfileConfiguration = () => {
             </label>
             <input
               type="text"
-              value={profile.distribucion}
+              value={profile.distribuidor}
               readOnly
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 cursor-not-allowed"
             />
