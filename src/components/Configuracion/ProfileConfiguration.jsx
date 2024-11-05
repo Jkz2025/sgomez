@@ -47,16 +47,6 @@ const ProfileConfiguration = () => {
       if (error) throw error;
 
       if (data) {
-        // Obtener la URL pública de la imagen si existe
-        let avatarUrl = null;
-        if (data.avatar_url) {
-          const { data: publicUrlData } = supabase
-            .storage
-            .from('avatars')
-            .getPublicUrl(data.avatar_url);
-          avatarUrl = publicUrlData.publicUrl;
-        }
-
         setProfile({
           nombre: data.nombre || "",
           apellido: data.apellido || "",
@@ -66,9 +56,17 @@ const ProfileConfiguration = () => {
           distribuidor: data.distribuidor || "",
           avatar_url: data.avatar_url || null
         });
-        
-        if (avatarUrl) {
-          setAvatarPreview(avatarUrl);
+
+        // Si existe avatar_url, obtener la URL pública
+        if (data.avatar_url) {
+          const { data: publicUrlData } = supabase
+            .storage
+            .from('avatars')
+            .getPublicUrl(data.avatar_url);
+            
+          if (publicUrlData?.publicUrl) {
+            setAvatarPreview(publicUrlData.publicUrl);
+          }
         }
       }
     } catch (error) {
@@ -105,7 +103,6 @@ const ProfileConfiguration = () => {
 
     const fileExt = file.name.split(".").pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
 
     try {
       // Primero eliminamos la imagen anterior si existe
@@ -118,7 +115,7 @@ const ProfileConfiguration = () => {
       // Subimos la nueva imagen
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
@@ -126,12 +123,12 @@ const ProfileConfiguration = () => {
       const { data: publicUrlData } = supabase
         .storage
         .from("avatars")
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       // Actualizar el perfil con la ruta del archivo
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: filePath })
+        .update({ avatar_url: fileName })
         .eq("id", userId);
 
       if (updateError) throw updateError;
@@ -139,13 +136,20 @@ const ProfileConfiguration = () => {
       // Actualizar estados locales
       setProfile(prev => ({
         ...prev,
-        avatar_url: filePath
+        avatar_url: fileName
       }));
+      
+      // Actualizamos el preview con la URL pública final
+      if (publicUrlData?.publicUrl) {
+        setAvatarPreview(publicUrlData.publicUrl);
+      }
+      
+      // Limpiamos la URL temporal
+      URL.revokeObjectURL(previewUrl);
       
     } catch (error) {
       console.error("Error subiendo avatar:", error);
       alert("No se pudo subir la imagen");
-      // Limpiar la previsualización en caso de error
       setAvatarPreview(null);
       URL.revokeObjectURL(previewUrl);
     }
@@ -165,7 +169,7 @@ const ProfileConfiguration = () => {
       if (error) throw error;
       alert("Perfil actualizado correctamente");
       // Recargar los datos del perfil después de guardar
-      fetchProfileData(userId);
+      await fetchProfileData(userId);
     } catch (error) {
       console.error("Error al momento de actualizar:", error);
       alert("No se pudieron guardar los cambios");
@@ -190,7 +194,7 @@ const ProfileConfiguration = () => {
                 src={avatarPreview}
                 alt="Avatar"
                 className="w-32 h-32 rounded-full object-cover"
-                onError={() => {
+                onError={(e) => {
                   console.error("Error loading image");
                   setAvatarPreview(null);
                 }}
