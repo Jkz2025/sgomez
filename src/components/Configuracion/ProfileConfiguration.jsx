@@ -13,7 +13,6 @@ const ProfileConfiguration = () => {
     avatar_url: null,
   });
   const [userId, setUserId] = useState(null);
-  const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
 
   useEffect(() => {
@@ -51,11 +50,11 @@ const ProfileConfiguration = () => {
         // Obtener la URL pública de la imagen si existe
         let avatarUrl = null;
         if (data.avatar_url) {
-          const { data: { publicUrl } } = supabase
+          const { data: publicUrlData } = supabase
             .storage
             .from('avatars')
-            .getPublicUrl(data.avatar_url.split('/').pop());
-          avatarUrl = publicUrl;
+            .getPublicUrl(data.avatar_url);
+          avatarUrl = publicUrlData.publicUrl;
         }
 
         setProfile({
@@ -65,9 +64,12 @@ const ProfileConfiguration = () => {
           telefono: data.telefono || "",
           cargo: data.cargo || "",
           distribuidor: data.distribuidor || "",
-          avatar_url: avatarUrl
+          avatar_url: data.avatar_url || null
         });
-        setAvatarPreview(avatarUrl);
+        
+        if (avatarUrl) {
+          setAvatarPreview(avatarUrl);
+        }
       }
     } catch (error) {
       console.error("Error cargando perfil:", error);
@@ -97,17 +99,20 @@ const ProfileConfiguration = () => {
       return;
     }
 
+    // Crear URL temporal para previsualización
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+
     const fileExt = file.name.split(".").pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const filePath = `${fileName}`;
 
     try {
       // Primero eliminamos la imagen anterior si existe
       if (profile.avatar_url) {
-        const oldFilePath = profile.avatar_url.split('/').pop();
         await supabase.storage
           .from("avatars")
-          .remove([oldFilePath]);
+          .remove([profile.avatar_url]);
       }
 
       // Subimos la nueva imagen
@@ -118,7 +123,7 @@ const ProfileConfiguration = () => {
       if (uploadError) throw uploadError;
 
       // Obtener la URL pública
-      const { data: { publicUrl } } = supabase
+      const { data: publicUrlData } = supabase
         .storage
         .from("avatars")
         .getPublicUrl(filePath);
@@ -126,21 +131,23 @@ const ProfileConfiguration = () => {
       // Actualizar el perfil con la ruta del archivo
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: filePath }) // Guardamos la ruta relativa
+        .update({ avatar_url: filePath })
         .eq("id", userId);
 
       if (updateError) throw updateError;
 
-      // Actualizar estados locales con la URL pública
+      // Actualizar estados locales
       setProfile(prev => ({
         ...prev,
-        avatar_url: publicUrl
+        avatar_url: filePath
       }));
-      setAvatarPreview(publicUrl);
       
     } catch (error) {
       console.error("Error subiendo avatar:", error);
       alert("No se pudo subir la imagen");
+      // Limpiar la previsualización en caso de error
+      setAvatarPreview(null);
+      URL.revokeObjectURL(previewUrl);
     }
   };
 
@@ -150,26 +157,18 @@ const ProfileConfiguration = () => {
         .from("profiles")
         .update({
           correo: profile.correo,
-          telefono: profile.telefono
+          telefono: profile.telefono,
+          avatar_url: profile.avatar_url
         })
         .eq("id", userId);
 
       if (error) throw error;
       alert("Perfil actualizado correctamente");
+      // Recargar los datos del perfil después de guardar
+      fetchProfileData(userId);
     } catch (error) {
       console.error("Error al momento de actualizar:", error);
       alert("No se pudieron guardar los cambios");
-    }
-  };
-
-  // Función para comprobar si una URL es válida
-  const isValidUrl = (url) => {
-    if (!url) return false;
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
     }
   };
 
@@ -186,13 +185,13 @@ const ProfileConfiguration = () => {
           />
 
           <label htmlFor="avatarUpload" className="cursor-pointer">
-            {avatarPreview && isValidUrl(avatarPreview) ? (
+            {avatarPreview ? (
               <img
                 src={avatarPreview}
                 alt="Avatar"
                 className="w-32 h-32 rounded-full object-cover"
-                onError={(e) => {
-                  console.error("Error loading image:", e);
+                onError={() => {
+                  console.error("Error loading image");
                   setAvatarPreview(null);
                 }}
               />
@@ -207,9 +206,7 @@ const ProfileConfiguration = () => {
           </label>
         </div>
 
-        {/* El resto del código del return permanece igual */}
         <div className="space-y-4">
-          {/* Nombre completo no editable */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Nombre
@@ -222,7 +219,6 @@ const ProfileConfiguration = () => {
             />
           </div>
 
-          {/* Cargo no editable */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Cargo
@@ -235,7 +231,6 @@ const ProfileConfiguration = () => {
             />
           </div>
 
-          {/* Email editable */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Correo Electrónico
@@ -249,7 +244,6 @@ const ProfileConfiguration = () => {
             />
           </div>
 
-          {/* Teléfono editable */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Teléfono
@@ -263,7 +257,6 @@ const ProfileConfiguration = () => {
             />
           </div>
 
-          {/* Distribución no editable */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Distribución
@@ -276,7 +269,6 @@ const ProfileConfiguration = () => {
             />
           </div>
 
-          {/* Botón de guardar */}
           <div className="mt-6">
             <button
               onClick={saveProfileChanges}
