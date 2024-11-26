@@ -96,7 +96,7 @@ const Calculadora = () => {
             type="text"
             value={valorTotal}
             onChange={handleValorTotalChange}
-            className="border p-2 w-full"
+            className="border p-2 w-full text-black"
           />
         </div>
         <div className="mb-4">
@@ -107,7 +107,8 @@ const Calculadora = () => {
             type="text"
             value={cuotaInicial}
             onChange={(handleCuotaInicialChange)}
-            className="border p-2 w-full"
+            className="border p-2 w-full text-black"
+
           />
         </div>
         <div className="mb-4">
@@ -116,7 +117,8 @@ const Calculadora = () => {
             type="text"
             value={iva}
             readOnly
-            className="border p-2 w-full bg-gray-200"
+            className="border p-2 w-full text-black"
+
           />
           
         </div>
@@ -126,7 +128,8 @@ const Calculadora = () => {
             type="text"
             value={preciocompra}
             readOnly
-            className="border p-2 w-full bg-gray-200"
+            className="border p-2 w-full text-black"
+
           />
           
         </div>
@@ -139,7 +142,7 @@ const Calculadora = () => {
             type="text"
             value={saldoFinanciar}
             readOnly
-            className="border p-2 w-full bg-gray-200"
+            className="border p-2 w-full text-black"
           />
         </div>
         <div className="justify-between flex">

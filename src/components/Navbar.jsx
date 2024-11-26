@@ -1,157 +1,100 @@
-import { useState } from "react";
-import Logo from "../assets/Logo.png";
+import React, { useState } from 'react';
+import { Home, Layers, Calculator, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from "../constants/AuthContext";
 import { supabase } from "./Functions/CreateClient";
+import logo from "../assets/Logo.png"
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [svgMenu, setSvgMenu] = useState(true);
-  const [svgX, setSvgX] = useState(false);
-  const { session,loading } = useAuth();
+  const { session, loading } = useAuth();
 
-  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    setSvgMenu(false);
-    setSvgX(true);
   };
 
-  const handleButton = () => {
-    setSvgMenu(true);
-    setIsMenuOpen(!isMenuOpen);
-    setSvgX(false);
-  };
+  const NavLink = ({ href, icon: Icon, label }) => (
+    <a
+      href={href}
+      className="group flex items-center space-x-2 text-blue-200 hover:text-white transition-all duration-300 
+        hover:bg-blue-900/30 px-4 py-2 rounded-lg"
+    >
+      <Icon className="w-5 h-5 text-blue-400 group-hover:text-blue-200" />
+      <span className="font-medium">{label}</span>
+    </a>
+  );
 
   if (loading) {
     return (
-      <nav className="w-full py-4 px-6 flex justify-between items-center bg-[#48CFCB] fixed top-0 left-0 z-50">
-        <div className="flex justify-between items-center w-full md:w-auto">
-          <div>
-            <img src={Logo} alt="Logo" className="w-10 h-10" />
-          </div>
-          <div className="text-white">Loading...</div>
+      <nav className="fixed top-0 left-0 w-full z-50 bg-gradient-to-br from-blue-900 via-black to-blue-900 p-4">
+        <div className="flex justify-between items-center">
+          <div className="animate-pulse text-blue-300">Loading...</div>
         </div>
       </nav>
     );
   }
 
   return (
-    <nav className="w-full py-4 px-6 flex justify-between items-center bg-[#48CFCB] fixed top-0 left-0 z-50 sm:bg-gradient-to-r sm:from-gray-800 sm:via-gray-900">
-      <div className="flex justify-between items-center w-full md:w-auto">
-        <button>
-          <img src={Logo} alt="Logo" className="w-10 h-10" />
-        </button>
-        <div>
-          <button className="block md:hidden" onClick={toggleMenu}>
-            {svgMenu && (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16m-7 6h7"
-                />
-              </svg>
-            )}
-          </button>
-
-          <button onClick={handleButton}>
-            {svgX && (
-              <svg
-                fill="#000000"
-                height="20px"
-                width="20px"
-                version="1.1"
-                id="Capa_1"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 460.775 460.775"
-              >
-                <path
-                  d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
-	c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55
-	c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505
-	c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55
-	l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
-	c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
-                />
-              </svg>
-            )}
-          </button>
+    <nav className="fixed top-0 left-0 w-full z-50 
+      bg-gradient-to-br from-blue-900 via-black to-blue-900 
+      shadow-2xl border-b border-blue-800/20">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+        {/* Logo Area */}
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-blue-500 rounded-full 
+            flex items-center justify-center 
+            ring-4 ring-blue-900/50 
+            animate-pulse">
+              <img src={logo} alt="logo" />
+          </div>
+          <span className="text-blue-200 font-semibold text-xl 
+            tracking-wider">Royal Prestige Cali</span>
         </div>
-      </div>
-      <div
-        className={`flex flex-col md:flex-row md:items-center md:space-x-8 mt-4 md:mt-0 w-full md:w-auto ${
-          isMenuOpen ? "block" : "hidden"
-        }`}
-      >
-        {!session && (
-          <>
-            <a
-              href="/"
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              Home
-            </a>
-            <a
-              href="/about"
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              About
-            </a>
-            <a
-              href="/contact"
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              Contact
-            </a>
-          </>
-        )}
-        {session && (
-           <>
-            <a
-              href="/catalogo"
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              Catalogo
-            </a>
-            <a
-              href="/Galeria"
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              Galeria
-            </a>
-            <a
-              href="/calculadora"
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              Calculadora
-            </a>
-            <a
-              href="/ProfileConfiguration"
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              Configuracion
-            </a>
-            <button
-              onClick={async () => {
-                const { error } = await supabase.auth.signOut();
-                if (!error) {
-                  // Redirect to login page or handle post-logout logic
-                  window.location.href = '/login';
-                }
-              }}
-              className="text-white hover:text-black py-2 px-4 text-center md:text-left"
-            >
-              Logout
-            </button>
-          </>
-        )}
+
+        {/* Mobile Menu Toggle */}
+        <button 
+          onClick={toggleMenu}
+          className="md:hidden text-blue-200 hover:text-white"
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Desktop/Mobile Navigation */}
+        <div 
+          className={`fixed md:static top-16 left-0 right-0 
+            md:flex md:items-center md:space-x-4 
+            ${isMenuOpen ? 'block' : 'hidden'} 
+            md:block bg-blue-900/80 md:bg-transparent 
+            backdrop-blur-xl md:backdrop-blur-0 
+            rounded-xl md:rounded-none p-4 md:p-0`}
+        >
+          {!session ? (
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+              <NavLink href="/" icon={Home} label="Home" />
+              <NavLink href="/about" icon={Layers} label="About" />
+              <NavLink href="/contact" icon={Calculator} label="Contact" />
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+              <NavLink href="/catalogo" icon={Layers} label="Catalogo" />
+              <NavLink href="/Galeria" icon={Home} label="Galeria" />
+              <NavLink href="/calculadora" icon={Calculator} label="Calculadora" />
+              <NavLink href="/ProfileConfiguration" icon={Settings} label="Configuracion" />
+              <button
+                onClick={async () => {
+                  const { error } = await supabase.auth.signOut();
+                  if (!error) {
+                    window.location.href = '/login';
+                  }
+                }}
+                className="group flex items-center space-x-2 text-red-300 hover:text-red-100 
+                  hover:bg-red-900/30 px-4 py-2 rounded-lg transition-all duration-300"
+              >
+                <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-200" />
+                <span className="font-medium">Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );
