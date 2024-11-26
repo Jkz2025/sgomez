@@ -24,6 +24,10 @@ const DashboardDistribuidor = () => {
       try {
         setIsLoading(true);
 
+        const { data: ventasResponse } = await supabase
+  .from('visitas')
+  .select('*')
+  .eq('distribucion', distribuidorData.distribuidor);
         // Existing fetch logic remains the same
         const { data: distribuidorData, error: distribuidorError } = await supabase
           .from('profiles')
@@ -33,7 +37,7 @@ const DashboardDistribuidor = () => {
 
         if (distribuidorError) throw distribuidorError;
 
-        const [profilesResponse, ventasResponse, citasResponse] = await Promise.all([
+        const [profilesResponse,  citasResponse] = await Promise.all([
           supabase
             .from('profiles')
             .select('*')
@@ -87,9 +91,19 @@ const DashboardDistribuidor = () => {
   };
 
   const getVentasTotal = (asesor) => {
+    // Verifica que las fechas sean válidas
+    if (!dateRange.startDate || !dateRange.endDate) return 0;
+  
+    const startDate = new Date(dateRange.startDate);
+    const endDate = new Date(dateRange.endDate);
+  
     return ventas
-      .filter(venta => venta.asesor_id === asesor.id)
-      .reduce((sum, venta) => sum + (venta.ventas || 0), 0);
+      .filter(venta => 
+        venta.asesor_id === asesor.id &&
+        new Date(venta.fecha) >= startDate &&
+        new Date(venta.fecha) <= endDate
+      )
+      .reduce((sum, venta) => sum + (venta.valor_venta || 0), 0) / 4000; // Convierte a dólares
   };
 
   if (error) return (
@@ -134,7 +148,14 @@ const DashboardDistribuidor = () => {
           <div>
             <h3 className="text-xl font-semibold">Ventas Totales</h3>
             <p className="text-3xl font-bold">
-              ${ventas.reduce((sum, venta) => sum + (venta.ventas || 0), 0).toLocaleString()}
+            ${ventas
+    .filter(venta => 
+      dateRange.startDate && dateRange.endDate && // Valida el rango
+      new Date(venta.fecha) >= new Date(dateRange.startDate) &&
+      new Date(venta.fecha) <= new Date(dateRange.endDate)
+    )
+    .reduce((sum, venta) => sum + (venta.valor_venta || 0), 0) / 4000 // Convierte a dólares
+    .toLocaleString()}
             </p>
           </div>
         </div>
