@@ -1,5 +1,6 @@
-import {  useState } from "react";
-
+import { useState } from "react";
+import { ClipboardCheck, RefreshCcw } from "lucide-react";
+import { Calculator } from "lucide-react";
 const Calculadora = () => {
   const [valorTotal, setValorTotal] = useState("");
   const [cuotaInicial, setCuotaInicial] = useState("");
@@ -8,25 +9,21 @@ const Calculadora = () => {
   const [saldoFinanciar, setSaldoFinanciar] = useState("");
   const [cuotas, setCuotas] = useState([]);
 
+  const handleClean = () => {
+    setValorTotal("")
+    setCuotaInicial("")
+    setSaldoFinanciar("")
+    setIva("")
+    setPrecioCompra("")
+    setCuotas([])
+  }
 
-    const handleClean = () => {
-        setValorTotal("")
-        setCuotaInicial("")
-        setSaldoFinanciar("")
-        setIva("")
-        setPrecioCompra("")
-    }
-   // Nueva función para formatear números con comas
-   const formatNumberWithCommas = (value) => {
-    // Eliminar cualquier caracter que no sea número
+  const formatNumberWithCommas = (value) => {
     const numberOnly = value.replace(/[^\d]/g, '');
-    // Convertir a número y formatear con comas
     return numberOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-   // Nueva función para quitar el formato antes de hacer cálculos
-   const parseFormattedNumber = (value) => {
-    // Eliminar las comas y convertir a número
+  const parseFormattedNumber = (value) => {
     return parseFloat(value.replace(/,/g, '')) || 0;
   };
 
@@ -41,15 +38,13 @@ const Calculadora = () => {
   };
 
   const calcularFinanciacion = () => {
-    // Convertir los valores formateados a números antes de calcular
     const valorTotalNumero = parseFormattedNumber(valorTotal);
     const cuotaInicialNumero = parseFormattedNumber(cuotaInicial);
 
     const ivaCalculado = valorTotalNumero / 1.19 - valorTotalNumero;
     const saldo = valorTotalNumero - cuotaInicialNumero;
-    const preciocomprafinal =  ivaCalculado + valorTotalNumero
+    const preciocomprafinal = ivaCalculado + valorTotalNumero
 
-    // Formatear los resultados con comas
     setIva(formatNumberWithCommas(ivaCalculado.toFixed(0)));
     setSaldoFinanciar(formatNumberWithCommas(saldo.toFixed(0)));
     setPrecioCompra(formatNumberWithCommas(preciocomprafinal.toFixed(0)))
@@ -85,101 +80,110 @@ const Calculadora = () => {
   };
 
   return (
-    <div className="p-4 mt-20">
-      <div className="max-w-4xl mx-auto p-8 text-center">
-        <h1 className="text-2xl font-bole mb-4">Calculadora</h1>
-        <div className="mb-4">
-          <label htmlFor="" className="block mb-2">
-            Valor Total
-          </label>
-          <input
-            type="text"
-            value={valorTotal}
-            onChange={handleValorTotalChange}
-            className="border p-2 w-full text-black"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="" className="block mb-2">
-            Cuota Inicial:
-          </label>
-          <input
-            type="text"
-            value={cuotaInicial}
-            onChange={(handleCuotaInicialChange)}
-            className="border p-2 w-full text-black"
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-8 mt-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-center">Calculadora Financiera</h1>
+        <p className="text-center text-gray-400">Calcula tu financiamiento</p>
+      </header>
 
-          />
+      <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Valor Total</label>
+            <input
+              type="text"
+              value={valorTotal}
+              onChange={handleValorTotalChange}
+              className="w-full bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2"
+              placeholder="Ingrese valor total"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Cuota Inicial</label>
+            <input
+              type="text"
+              value={cuotaInicial}
+              onChange={handleCuotaInicialChange}
+              className="w-full bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2"
+              placeholder="Ingrese cuota inicial"
+            />
+          </div>
         </div>
-        <div className="mb-4">
-          <label className="block mb-2">IVA:</label>
-          <input
-            type="text"
-            value={iva}
-            readOnly
-            className="border p-2 w-full text-black"
 
-          />
-          
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">IVA</label>
+            <input
+              type="text"
+              value={iva}
+              readOnly
+              className="w-full bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Precio Compra</label>
+            <input
+              type="text"
+              value={preciocompra}
+              readOnly
+              className="w-full bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Saldo a Financiar</label>
+            <input
+              type="text"
+              value={saldoFinanciar}
+              readOnly
+              className="w-full bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2"
+            />
+          </div>
         </div>
-        <div className="mb-4">
-          <label className="block mb-2">Precio Compra:</label>
-          <input
-            type="text"
-            value={preciocompra}
-            readOnly
-            className="border p-2 w-full text-black"
 
-          />
-          
+        <div className="flex justify-center space-x-4 mb-6">
+          <button
+            onClick={calcularFinanciacion}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center"
+          >
+            <Calculator className="mr-2 w-5 h-5" />
+            Calcular
+          </button>
+          <button
+            onClick={handleClean}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center"
+          >
+            <RefreshCcw className="mr-2 w-5 h-5" />
+            Limpiar
+          </button>
         </div>
-      
-        <div className="mb-4">
-          <label htmlFor="" className="block mb-2">
-            Saldo a Financiar:
-          </label>
-          <input
-            type="text"
-            value={saldoFinanciar}
-            readOnly
-            className="border p-2 w-full text-black"
-          />
-        </div>
-        <div className="justify-between flex">
-        <button
-          onClick={calcularFinanciacion}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          Calcular
-        </button>
-        <button
-          onClick={handleClean}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          Limpiar
-        </button>
-        </div>
-      
-        <table className="table-auto w-full mt-4">
-          <thead>
-            <tr>
-              <th className="px-4 py-2">Numero Cuotas (26,82 %)</th>
-              <th className="px-4 py-2">(2 %) Financiacion</th>
-              <th className="px-4 py-2">Cuota Minima</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cuotas.map((cuota, index) => (
-               <tr key={index}>
-               <td className="border px-4 py-2">{cuota.cantidad}</td>
-               <td className="border px-4 py-2">{cuota.porcentaje}%</td>
-               <td className="border px-4 py-2">
-                 ${formatNumberWithCommas(cuota.cuotaMinima.toFixed(0))}
-               </td>
-             </tr>
-            ))}
-          </tbody>
-        </table>
+
+        {cuotas.length > 0 && (
+          <div className="bg-gray-700 rounded-lg p-6">
+            <h2 className="text-2xl font-semibold mb-4 text-center">Opciones de Financiamiento</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-800">
+                    <th className="px-4 py-2 text-left">Número de Cuotas</th>
+                    <th className="px-4 py-2 text-left">% Financiación</th>
+                    <th className="px-4 py-2 text-right">Cuota Mínima</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cuotas.map((cuota, index) => (
+                    <tr key={index} className="border-b border-gray-600">
+                      <td className="px-4 py-2">{cuota.cantidad}</td>
+                      <td className="px-4 py-2">{cuota.porcentaje}%</td>
+                      <td className="px-4 py-2 text-right">
+                        ${formatNumberWithCommas(cuota.cuotaMinima.toFixed(0))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
