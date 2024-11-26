@@ -1,42 +1,120 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+@layer components {
+  .input-futurista {
+    @apply 
+      w-full 
+      bg-zinc-800 
+      border 
+      border-zinc-700 
+      text-gray-200 
+      rounded-lg 
+      px-4 
+      py-2 
+      outline-none 
+      focus:ring-2 
+      focus:ring-blue-600 
+      focus:border-transparent 
+      transition-all 
+      duration-300 
+      placeholder-gray-500
   }
-  to {
-    transform: rotate(360deg);
+
+  /* Estilo para inputs con iconos */
+  .input-group {
+    @apply relative flex items-center;
+  }
+
+  .input-icon {
+    @apply 
+      absolute 
+      left-3 
+      text-gray-400 
+      pointer-events-none
+  }
+
+  .input-with-icon {
+    @apply 
+      pl-10 
+      input-futurista
+  }
+
+  /* Estilos de labels */
+  .input-label {
+    @apply 
+      text-gray-300 
+      text-sm 
+      mb-2 
+      block 
+      font-medium
+  }
+
+  /* Estilos de error */
+  .input-error {
+    @apply 
+      border-red-600 
+      text-red-400 
+      focus:ring-red-600
+  }
+
+  /* Checkbox y switch futuristas */
+  .checkbox-futurista {
+    @apply 
+      appearance-none 
+      w-5 
+      h-5 
+      border 
+      border-zinc-700 
+      rounded 
+      bg-zinc-800 
+      checked:bg-blue-600 
+      checked:border-blue-600 
+      focus:outline-none 
+      focus:ring-2 
+      focus:ring-blue-500
+  }
+
+  .toggle-switch {
+    @apply 
+      relative 
+      inline-block 
+      w-12 
+      h-6 
+      bg-zinc-700 
+      rounded-full 
+      cursor-pointer 
+      transition-colors 
+      duration-300;
+  }
+
+  .toggle-switch-handle {
+    @apply 
+      absolute 
+      top-1 
+      left-1 
+      w-4 
+      h-4 
+      bg-gray-300 
+      rounded-full 
+      transition-transform 
+      duration-300
+  }
+
+  /* Estado activado del toggle */
+  .toggle-switch.active {
+    @apply bg-blue-600;
+  }
+
+  .toggle-switch.active .toggle-switch-handle {
+    @apply translate-x-6 bg-white;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Animaciones adicionales */
+@keyframes input-focus {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.input-futurista:focus {
+  animation: input-focus 0.5s ease-in-out;
 }
