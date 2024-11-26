@@ -10,23 +10,43 @@ const DashboardAsesor = () => {
     pendientes: 0,
     reprogramadas: 0,
   });
+
   const {
     visitas,
-    loading,
+    setVisitas,
     startDate,
     endDate,
     setStartDate,
-    setVisitas,
     setEndDate,
   } = useFetchVisitas();
 
   useEffect(() => {
+    fetchVisitas();
     fetchTodayStats();
   }, [startDate, endDate]);
 
+  // Función para cargar visitas
+  const fetchVisitas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("visitas")
+        .select("*")
+        .eq("pendientes")
+        .gte("fecha", `${startDate} 00:00:00`)
+        .lte("fecha", `${endDate} 23:59:59`);
+
+      if (error) throw error;
+
+      setVisitas(data);
+    } catch (error) {
+      console.error("Error al cargar visitas:", error);
+      Swal.fire("Error", "No se pudieron cargar las visitas", "error");
+    }
+  };
+
+  // Estadísticas de visitas
   const fetchTodayStats = async () => {
     try {
-      const today = new Date().toISOString().split("T")[0];
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
@@ -36,32 +56,167 @@ const DashboardAsesor = () => {
       const fetchCount = async (estado) => {
         const { data, error } = await supabase
           .from("visitas")
-          .select("count")
+          .select("id", { count: "exact" })
           .eq("estado", estado)
-          .gte("fecha", startDate)
+          .gte("fecha", `${startDate} 00:00:00`)
           .lte("fecha", `${endDate} 23:59:59`)
           .eq("asesor", userId);
 
         if (error) throw error;
-        return data?.[0]?.count || 0;
+        return data.length;
       };
 
       const [realizadas, pendientes, reprogramadas] = await Promise.all([
         fetchCount("realizada"),
         fetchCount("pendiente"),
-        fetchCount("reprogramar"),
+        fetchCount("reprogramada"),
       ]);
 
-      setStatsHoy({
-        realizadas,
-        pendientes,
-        reprogramadas,
-      });
+      setStatsHoy({ realizadas, pendientes, reprogramadas });
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
       Swal.fire("Error", "No se pudieron cargar las estadísticas", "error");
     }
   };
+
+  //Funcion para reprogramar
+  const handleReprogramar = async (visita) => {
+    const { isConfirmed } = await Swal.fire({
+      title: '¿Está seguro que desea reprogramar la visita?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No',
+      icon: 'question',
+    });
+  
+    if (!isConfirmed) return;
+  
+    // Cambiar estado a "reprogramada" en Supabase
+    const { error: updateError } = await supabase
+      .from('visitas')
+      .update({ estado: 'reprogramada' })
+      .eq('id', visita.id);
+  
+    if (updateError) {
+      Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
+      return;
+    }
+  
+    // Input para detalles de reprogramación
+    const { value: detallesReprogramacion } = await Swal.fire({
+      title: 'Detalles de la reprogramación',
+      input: 'textarea',
+      inputPlaceholder: 'Escriba los motivos de la reprogramación...',
+      showCancelButton: true,
+    });
+  
+    if (detallesReprogramacion) {
+      const { error } = await supabase
+        .from('visitas')
+        .update({ detalles_visita: detallesReprogramacion })
+        .eq('id', visita.id);
+  
+      if (error) {
+        Swal.fire('Error', 'No se pudieron guardar los detalles.', 'error');
+        return;
+      }
+  
+      Swal.fire('Éxito', 'Los motivos de la reprogramación se guardaron correctamente.', 'success');
+    }
+  };
+
+  //Funcion para Realizar visita
+  const handleRealizar = async (visita) => {
+    const { isConfirmed } = await Swal.fire({
+      title: '¿Está seguro que desea realizar la visita?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No',
+      icon: 'question',
+    });
+  
+    if (!isConfirmed) return;
+  
+    // Cambiar estado a "realizada" en Supabase
+    const { error: updateError } = await supabase
+      .from('visitas')
+      .update({ estado: 'realizada' })
+      .eq('id', visita.id);
+  
+    if (updateError) {
+      Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
+      return;
+    }
+  
+    // Preguntar si se realizó la venta
+    const { isConfirmed: ventaRealizada } = await Swal.fire({
+      title: '¿Se realizó la venta?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No',
+      icon: 'question',
+    });
+  
+    if (ventaRealizada) {
+      // Inputs para valor y detalles de venta
+      const { value: formValues } = await Swal.fire({
+        title: 'Detalles de la venta',
+        html: `
+          <input id="valor_venta" type="number" placeholder="Valor de la venta" class="swal2-input" />
+          <textarea id="detalles_venta" placeholder="Detalles de lo vendido" class="swal2-textarea"></textarea>
+        `,
+        focusConfirm: false,
+        preConfirm: () => {
+          const valorVenta = document.getElementById('valor_venta').value;
+          const detallesVenta = document.getElementById('detalles_venta').value;
+          if (!valorVenta || !detallesVenta) {
+            Swal.showValidationMessage('Por favor complete ambos campos.');
+            return null;
+          }
+          return { valorVenta, detallesVenta };
+        },
+      });
+  
+      if (formValues) {
+        const { valorVenta, detallesVenta } = formValues;
+        // Actualizar detalles y valor en Supabase
+        const { error } = await supabase
+          .from('visitas')
+          .update({ valor_venta: valorVenta, detalles_visita: detallesVenta })
+          .eq('id', visita.id);
+  
+        if (error) {
+          Swal.fire('Error', 'No se pudieron guardar los detalles.', 'error');
+          return;
+        }
+  
+        Swal.fire('Éxito', 'Los detalles de la venta se guardaron correctamente.', 'success');
+      }
+    } else {
+      // Input para detalles de la visita
+      const { value: detallesVisita } = await Swal.fire({
+        title: 'Detalles de la visita',
+        input: 'textarea',
+        inputPlaceholder: 'Escriba los detalles de la visita...',
+        showCancelButton: true,
+      });
+  
+      if (detallesVisita) {
+        const { error } = await supabase
+          .from('visitas')
+          .update({ detalles_visita: detallesVisita })
+          .eq('id', visita.id);
+  
+        if (error) {
+          Swal.fire('Error', 'No se pudieron guardar los detalles.', 'error');
+          return;
+        }
+  
+        Swal.fire('Éxito', 'Los detalles de la visita se guardaron correctamente.', 'success');
+      }
+    }
+  };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-8 mt-8">
@@ -70,7 +225,9 @@ const DashboardAsesor = () => {
         <p className="text-center text-gray-400">Gestión de visitas en tiempo real</p>
       </header>
 
-      {/* Stats Cards */}
+     
+
+      {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-gradient-to-br from-green-800 to-green-600 p-6 rounded-lg shadow-md flex items-center">
           <ClipboardCheck className="w-10 h-10 text-green-200 mr-4" />
@@ -95,53 +252,79 @@ const DashboardAsesor = () => {
         </div>
       </div>
 
-      {/* Visits Table */}
-      <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">Visitas Pendientes</h2>
-        <div className="flex space-x-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300">Fecha Inicial</label>
-            <input
-              type="date"
-              className="mt-1 bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2 w-full"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">Fecha Final</label>
-            <input
-              type="date"
-              className="mt-1 bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2 w-full"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
+ {/* Filtros por rango de fecha */}
+ <div className="flex justify-center space-x-4 mb-8">
+        <div>
+          <label htmlFor="startDate" className="block text-gray-400">
+            Fecha inicial:
+          </label>
+          <input
+            type="date"
+            id="startDate"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="border p-2 rounded bg-gray-800 text-white"
+          />
         </div>
-        {loading ? (
-          <p className="text-gray-400">Cargando visitas...</p>
-        ) : visitas.length > 0 ? (
-          <ul className="space-y-4">
-            {visitas.map((visita) => (
-              <li key={visita.id} className="p-4 bg-gray-700 rounded-lg flex justify-between items-center">
-                <div>
-                  <h3 className="font-bold">{visita.cliente}</h3>
-                  <p className="text-gray-400 text-sm">{visita.direccion}</p>
-                </div>
-                <div className="flex space-x-4">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">
-                    Realizar
-                  </button>
-                  <button className="bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg px-4 py-2">
-                    Reprogramar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-400">No hay visitas pendientes en este rango.</p>
-        )}
+        <div>
+          <label htmlFor="endDate" className="block text-gray-400">
+            Fecha final:
+          </label>
+          <input
+            type="date"
+            id="endDate"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="border p-2 rounded bg-gray-800 text-white"
+          />
+        </div>
+      </div>
+      {/* Visitas */}
+      <div className="bg-gray-800 rounded-lg shadow-lg p-6 max-w-6xl mx-auto">
+        
+        <h2 className="text-2xl font-semibold mb-4 text-center text-white">
+          Visitas Pendientes
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {visitas.length > 0 ? (
+            visitas.map((visita) => (
+              <div
+                key={visita.id}
+                className={`p-4 rounded-lg shadow-lg ${
+                  visita.estado === "pendiente"
+                    ? "bg-blue-900/30"
+                    : visita.estado === "realizada"
+                    ? "bg-green-900/30"
+                    : "bg-yellow-900/30"
+                }`}
+              >
+                <h3 className="font-bold text-lg text-white">{visita.nombre}</h3>
+                <p><span className="font-medium text-gray-400">Direccion:</span> {visita.ciudad}, {visita.barrio}, {visita.direccion}</p>
+                <p><span className="font-medium text-gray-400">Telefono:</span> {visita.telefono}</p>
+                <p><span className="font-medium text-gray-400">Fecha:</span> {visita.fecha}</p>
+                <p><span className="font-medium text-gray-400">Hora:</span> {visita.hora}</p>
+                <p><span className="font-medium text-gray-400">Detalle:</span> {visita.detalles}</p>
+                <button
+              onClick={() => handleRealizar(visita, "complete")}
+              className="text-green-500 text-sm md:text-base"
+            >
+              Marcar Realizada
+            </button>
+            <button
+              onClick={() => handleReprogramar(visita, "reprogramar")}
+              className="text-yellow-500 text-sm md:text-base ml-2"
+            >
+              Reprogramar
+            </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-center col-span-full">
+              No hay visitas en este rango.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
