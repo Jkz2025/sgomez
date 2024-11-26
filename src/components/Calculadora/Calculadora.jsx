@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 
 const Calculadora = () => {
   const [valorTotal, setValorTotal] = useState("");
   const [cuotaInicial, setCuotaInicial] = useState("");
   const [iva, setIva] = useState("");
+  const [preciocompra, setPrecioCompra] = useState("");
   const [saldoFinanciar, setSaldoFinanciar] = useState("");
   const [cuotas, setCuotas] = useState([]);
 
@@ -13,6 +14,7 @@ const Calculadora = () => {
         setCuotaInicial("")
         setSaldoFinanciar("")
         setIva("")
+        setPrecioCompra("")
     }
    // Nueva función para formatear números con comas
    const formatNumberWithCommas = (value) => {
@@ -45,10 +47,13 @@ const Calculadora = () => {
 
     const ivaCalculado = valorTotalNumero / 1.19 - valorTotalNumero;
     const saldo = valorTotalNumero - cuotaInicialNumero;
-    
+    const preciocomprafinal =  ivaCalculado + valorTotalNumero
+
     // Formatear los resultados con comas
     setIva(formatNumberWithCommas(ivaCalculado.toFixed(0)));
     setSaldoFinanciar(formatNumberWithCommas(saldo.toFixed(0)));
+    setPrecioCompra(formatNumberWithCommas(preciocomprafinal.toFixed(0)))
+
     const nuevasCuotas = [
       { cantidad: 2, porcentaje: 51.53, cuotaMinima: saldo * 0.5153 },
       { cantidad: 3, porcentaje: 34.71, cuotaMinima: saldo * 0.3471 },
@@ -95,15 +100,6 @@ const Calculadora = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2">IVA:</label>
-          <input
-            type="text"
-            value={iva}
-            readOnly
-            className="border p-2 w-full bg-gray-200"
-          />
-        </div>
-        <div className="mb-4">
           <label htmlFor="" className="block mb-2">
             Cuota Inicial:
           </label>
@@ -114,6 +110,27 @@ const Calculadora = () => {
             className="border p-2 w-full"
           />
         </div>
+        <div className="mb-4">
+          <label className="block mb-2">IVA:</label>
+          <input
+            type="text"
+            value={iva}
+            readOnly
+            className="border p-2 w-full bg-gray-200"
+          />
+          
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Precio Compra:</label>
+          <input
+            type="text"
+            value={preciocompra}
+            readOnly
+            className="border p-2 w-full bg-gray-200"
+          />
+          
+        </div>
+      
         <div className="mb-4">
           <label htmlFor="" className="block mb-2">
             Saldo a Financiar:
@@ -143,8 +160,8 @@ const Calculadora = () => {
         <table className="table-auto w-full mt-4">
           <thead>
             <tr>
-              <th className="px-4 py-2">Numero Cuotas</th>
-              <th className="px-4 py-2">% Financiacion</th>
+              <th className="px-4 py-2">Numero Cuotas (26,82 %)</th>
+              <th className="px-4 py-2">(2 %) Financiacion</th>
               <th className="px-4 py-2">Cuota Minima</th>
             </tr>
           </thead>
