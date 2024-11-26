@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Layers, Calculator, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from "../constants/AuthContext";
 import { supabase } from "./Functions/CreateClient";
-import logo from "../assets/Logo.png"
+import logo from "../assets/Logo.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { session, loading } = useAuth();
+  const [userRole, setUserRole] = useState(null); // Guardar el rango del usuario
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -22,6 +23,41 @@ const Navbar = () => {
       <span className="font-medium">{label}</span>
     </a>
   );
+
+  // Consulta el rango del usuario logueado
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (session) {
+        const { data, error } = await supabase
+          .from('profiles') // Cambia 'usuarios' por el nombre de tu tabla en Supabase
+          .select('cargo')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user role:', error);
+        } else {
+          setUserRole(data.rango);
+        }
+      }
+    };
+
+    fetchUserRole();
+  }, [session]);
+
+  // Mapear los rangos a las rutas
+  const getDashboardLink = () => {
+    switch (userRole) {
+      case 'distribuidor':
+        return '/dashboard-distribuidor';
+      case 'televentas':
+        return '/dashboard-televentas';
+      case 'asesor':
+        return '/dashboard-asesor';
+      default:
+        return '/'; // Ruta por defecto
+    }
+  };
 
   if (loading) {
     return (
@@ -40,12 +76,13 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo Area */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-full 
-            flex items-center justify-center 
-            ring-4 ring-blue-900/50 
-            animate-pulse">
+          <a href={getDashboardLink()} className="flex items-center">
+            <div className="w-10 h-10 bg-blue-500 rounded-full 
+              flex items-center justify-center 
+              ring-4 ring-blue-900/50">
               <img src={logo} alt="logo" />
-          </div>
+            </div>
+          </a>
           <span className="text-blue-200 font-semibold text-xl 
             tracking-wider">Royal Prestige Cali</span>
         </div>
