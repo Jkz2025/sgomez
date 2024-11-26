@@ -7,7 +7,7 @@ import { BarChart, ClipboardCheck, RefreshCcw } from "lucide-react";
 const DashboardAsesor = () => {
   const [statsHoy, setStatsHoy] = useState({
     realizadas: 0,
-    pendientes: 0,
+    pendiente: 0,
     reprogramadas: 0,
   });
 
@@ -31,7 +31,7 @@ const DashboardAsesor = () => {
       const { data, error } = await supabase
         .from("visitas")
         .select("*")
-        .eq("pendientes")
+        .eq("pendiente")
         .gte("fecha", `${startDate} 00:00:00`)
         .lte("fecha", `${endDate} 23:59:59`);
 
@@ -66,13 +66,13 @@ const DashboardAsesor = () => {
         return data.length;
       };
 
-      const [realizadas, pendientes, reprogramadas] = await Promise.all([
+      const [realizadas, pendiente, reprogramadas] = await Promise.all([
         fetchCount("realizada"),
         fetchCount("pendiente"),
         fetchCount("reprogramada"),
       ]);
 
-      setStatsHoy({ realizadas, pendientes, reprogramadas });
+      setStatsHoy({ realizadas, pendiente, reprogramadas });
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
       Swal.fire("Error", "No se pudieron cargar las estadísticas", "error");
@@ -239,8 +239,8 @@ const DashboardAsesor = () => {
         <div className="bg-gradient-to-br from-yellow-800 to-yellow-600 p-6 rounded-lg shadow-md flex items-center">
           <BarChart className="w-10 h-10 text-yellow-200 mr-4" />
           <div>
-            <h3 className="text-xl font-semibold">Pendientes</h3>
-            <p className="text-3xl font-bold">{statsHoy.pendientes}</p>
+            <h3 className="text-xl font-semibold">Pendiente</h3>
+            <p className="text-3xl font-bold">{statsHoy.pendiente}</p>
           </div>
         </div>
         <div className="bg-gradient-to-br from-red-800 to-red-600 p-6 rounded-lg shadow-md flex items-center">
@@ -283,7 +283,7 @@ const DashboardAsesor = () => {
       <div className="bg-gray-800 rounded-lg shadow-lg p-6 max-w-6xl mx-auto">
         
         <h2 className="text-2xl font-semibold mb-4 text-center text-white">
-          Visitas Pendientes
+          Visitas Pendiente
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
