@@ -113,7 +113,7 @@ const Navbar = () => {
           ) : (
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
               <NavLink href="/catalogo" icon={Layers} label="Catalogo" />
-              <NavLink href="/Galeria" icon={Home} label="Galeria" />
+              {/* <NavLink href="/Galeria" icon={Home} label="Galeria" /> */}
               <NavLink href="/calculadora" icon={Calculator} label="Calculadora" />
               <NavLink href="/ProfileConfiguration" icon={Settings} label="Configuracion" />
               <button
