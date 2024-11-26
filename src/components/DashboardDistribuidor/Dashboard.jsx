@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../Functions/CreateClient';
 import { useAuth } from '../../constants/AuthContext';
+import { Users, TrendingUp, Calendar } from 'lucide-react';
 
 const DashboardDistribuidor = () => {
   const [televentas, setTeleventas] = useState([]);
@@ -23,7 +24,7 @@ const DashboardDistribuidor = () => {
       try {
         setIsLoading(true);
 
-        // Obtener el perfil del distribuidor
+        // Existing fetch logic remains the same
         const { data: distribuidorData, error: distribuidorError } = await supabase
           .from('profiles')
           .select('*')
@@ -32,7 +33,6 @@ const DashboardDistribuidor = () => {
 
         if (distribuidorError) throw distribuidorError;
 
-        // Obtener perfiles y ventas
         const [profilesResponse, ventasResponse, citasResponse] = await Promise.all([
           supabase
             .from('profiles')
@@ -68,10 +68,10 @@ const DashboardDistribuidor = () => {
   }, [session]);
 
   const getVentasColor = (monto) => {
-    if (monto < 3000) return 'bg-red-100';
-    if (monto < 5000) return 'bg-yellow-100';
-    if (monto < 10000) return 'bg-green-100';
-    return 'bg-amber-100';
+    if (monto < 3000) return 'from-red-800 to-red-600';
+    if (monto < 5000) return 'from-yellow-800 to-yellow-600';
+    if (monto < 10000) return 'from-green-800 to-green-600';
+    return 'from-blue-800 to-blue-600';
   };
 
   const getCitasColor = (asesor) => {
@@ -80,10 +80,10 @@ const DashboardDistribuidor = () => {
     const reprogramadas = asesorCitas.filter(cita => cita.estado === 'reprogramar').length;
     const realizadas = asesorCitas.filter(cita => cita.estado === 'realizada').length;
 
-    if (pendientes > Math.max(reprogramadas, realizadas)) return 'bg-yellow-100';
-    if (realizadas > Math.max(pendientes, reprogramadas)) return 'bg-green-100';
-    if (reprogramadas > Math.max(pendientes, realizadas)) return 'bg-red-100';
-    return '';
+    if (pendientes > Math.max(reprogramadas, realizadas)) return 'from-yellow-800 to-yellow-600';
+    if (realizadas > Math.max(pendientes, reprogramadas)) return 'from-green-800 to-green-600';
+    if (reprogramadas > Math.max(pendientes, realizadas)) return 'from-red-800 to-red-600';
+    return 'from-blue-800 to-blue-600';
   };
 
   const getVentasTotal = (asesor) => {
@@ -92,8 +92,6 @@ const DashboardDistribuidor = () => {
       .reduce((sum, venta) => sum + (venta.ventas || 0), 0);
   };
 
-
-
   if (error) return (
     <div className="text-red-500 text-center p-4">
       Error: {error}
@@ -101,44 +99,85 @@ const DashboardDistribuidor = () => {
   );
 
   return (
-    <div className="p-6 space-y-6 mt-20">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Dashboard Distribuidor</h1>
-        <div className="flex gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-8 mt-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-center">Dashboard Distribuidor</h1>
+        <p className="text-center text-gray-400">Gestión de ventas y citas</p>
+      </header>
+
+      {/* Date Range Selector */}
+      <div className="flex justify-center space-x-4 mb-8">
+        <div>
+          <label className="block text-sm font-medium text-gray-300">Fecha Inicial</label>
           <input
             type="date"
             value={dateRange.startDate}
             onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-            className="border rounded px-2 py-1"
+            className="mt-1 bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2 w-full"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-300">Fecha Final</label>
           <input
             type="date"
             value={dateRange.endDate}
             onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-            className="border rounded px-2 py-1"
+            className="mt-1 bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2 w-full"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-md p-4 space-y-4">
-          <h2 className="text-xl font-bold">Asesores</h2>
-          <div className="overflow-y-auto max-h-[400px]">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-800 to-blue-600 p-6 rounded-lg shadow-md flex items-center">
+          <TrendingUp className="w-10 h-10 text-blue-200 mr-4" />
+          <div>
+            <h3 className="text-xl font-semibold">Ventas Totales</h3>
+            <p className="text-3xl font-bold">
+              ${ventas.reduce((sum, venta) => sum + (venta.ventas || 0), 0).toLocaleString()}
+            </p>
+          </div>
+        </div>
+        <div className="bg-gradient-to-br from-green-800 to-green-600 p-6 rounded-lg shadow-md flex items-center">
+          <Calendar className="w-10 h-10 text-green-200 mr-4" />
+          <div>
+            <h3 className="text-xl font-semibold">Citas Realizadas</h3>
+            <p className="text-3xl font-bold">
+              {citas.filter(cita => cita.estado === 'realizada').length}
+            </p>
+          </div>
+        </div>
+        <div className="bg-gradient-to-br from-yellow-800 to-yellow-600 p-6 rounded-lg shadow-md flex items-center">
+          <Users className="w-10 h-10 text-yellow-200 mr-4" />
+          <div>
+            <h3 className="text-xl font-semibold">Citas Pendientes</h3>
+            <p className="text-3xl font-bold">
+              {citas.filter(cita => cita.estado === 'pendiente').length}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Asesores and Televentas Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-white">Asesores</h2>
+          <div className="space-y-4 max-h-[400px] overflow-y-auto">
             {asesores.map(asesor => {
               const ventasTotal = getVentasTotal(asesor);
               return (
-                <div
-                  key={asesor.id}
-                  className={`p-4 rounded-lg ${getVentasColor(ventasTotal)} ${getCitasColor(asesor)}`}
+                <div 
+                  key={asesor.id} 
+                  className={`bg-gradient-to-br ${getVentasColor(ventasTotal)} ${getCitasColor(asesor)} p-4 rounded-lg shadow-md`}
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-semibold">{asesor.nombre}</h3>
-                      <p className="text-sm text-gray-600">ID: {asesor.codigo}</p>
+                      <h3 className="font-semibold text-white">{asesor.nombre}</h3>
+                      <p className="text-sm text-gray-200">ID: {asesor.codigo}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">${ventasTotal.toLocaleString()}</p>
-                      <p className="text-sm">
+                      <p className="font-bold text-white">${ventasTotal.toLocaleString()}</p>
+                      <p className="text-sm text-gray-200">
                         Citas: {citas.filter(cita => cita.asesor_id === asesor.id).length}
                       </p>
                     </div>
@@ -149,43 +188,22 @@ const DashboardDistribuidor = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 space-y-4">
-          <h2 className="text-xl font-bold">Televentas</h2>
-          <div className="overflow-y-auto max-h-[400px]">
+        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-white">Televentas</h2>
+          <div className="space-y-4 max-h-[400px] overflow-y-auto">
             {televentas.map(televenta => (
-              <div key={televenta.id} className="p-4 rounded-lg bg-gray-50">
+              <div 
+                key={televenta.id} 
+                className="bg-gradient-to-br from-gray-700 to-gray-600 p-4 rounded-lg shadow-md"
+              >
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-semibold">{televenta.nombre}</h3>
-                    <p className="text-sm text-gray-600">ID: {televenta.codigo}</p>
+                    <h3 className="font-semibold text-white">{televenta.nombre}</h3>
+                    <p className="text-sm text-gray-200">ID: {televenta.codigo}</p>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-4 space-y-4">
-        <h2 className="text-xl font-bold">Resumen de Ventas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg bg-blue-100">
-            <h3 className="font-semibold">Ventas Totales</h3>
-            <p className="text-2xl font-bold">
-              ${ventas.reduce((sum, venta) => sum + (venta.ventas || 0), 0).toLocaleString()}
-            </p>
-          </div>
-          <div className="p-4 rounded-lg bg-green-100">
-            <h3 className="font-semibold">Citas Realizadas</h3>
-            <p className="text-2xl font-bold">
-              {citas.filter(cita => cita.estado === 'realizada').length}
-            </p>
-          </div>
-          <div className="p-4 rounded-lg bg-yellow-100">
-            <h3 className="font-semibold">Citas Pendientes</h3>
-            <p className="text-2xl font-bold">
-              {citas.filter(cita => cita.estado === 'pendiente').length}
-            </p>
           </div>
         </div>
       </div>
