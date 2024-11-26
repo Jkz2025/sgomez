@@ -2,6 +2,7 @@ import { useFetchVisitas } from "./useFetchVisitas";
 import { useState, useEffect } from "react";
 import { supabase } from "../Functions/CreateClient";
 import Swal from "sweetalert2";
+import { BarChart, ClipboardCheck, RefreshCcw } from "lucide-react";
 
 const DashboardAsesor = () => {
   const [statsHoy, setStatsHoy] = useState({
@@ -26,7 +27,6 @@ const DashboardAsesor = () => {
   const fetchTodayStats = async () => {
     try {
       const today = new Date().toISOString().split("T")[0];
-      
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
@@ -41,7 +41,7 @@ const DashboardAsesor = () => {
           .gte("fecha", startDate)
           .lte("fecha", `${endDate} 23:59:59`)
           .eq("asesor", userId);
-        
+
         if (error) throw error;
         return data?.[0]?.count || 0;
       };
@@ -49,222 +49,90 @@ const DashboardAsesor = () => {
       const [realizadas, pendientes, reprogramadas] = await Promise.all([
         fetchCount("realizada"),
         fetchCount("pendiente"),
-        fetchCount("reprogramar")
+        fetchCount("reprogramar"),
       ]);
 
       setStatsHoy({
         realizadas,
         pendientes,
-        reprogramadas
+        reprogramadas,
       });
-
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
       Swal.fire("Error", "No se pudieron cargar las estadísticas", "error");
     }
   };
 
-  const handleRealizarVisita = async (visita) => {
-    try {
-      // Simple confirmation dialog
-      const willProceed = await Swal.fire({
-        title: "Confirmar",
-        text: "¿Está seguro que desea marcar la visita como realizada?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sí",
-        cancelButtonText: "No"
-      });
-
-      if (!willProceed.isConfirmed) return;
-
-      // Get observation details
-      const observacionInput = await Swal.fire({
-        title: "Observación",
-        text: "Ingrese los detalles de la visita",
-        input: "textarea",
-        showCancelButton: true,
-        inputValidator: (value) => !value && "Por favor ingrese una observación"
-      });
-
-      if (!observacionInput.isConfirmed) return;
-      const detalles = observacionInput.value;
-
-      // Ask about sale
-      const huboVenta = await Swal.fire({
-        title: "Venta",
-        text: "¿Hubo venta en esta visita?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sí",
-        cancelButtonText: "No"
-      });
-
-      let valorVenta = null;
-      if (huboVenta.isConfirmed) {
-        const valorInput = await Swal.fire({
-          title: "Valor",
-          text: "Ingrese el valor de la venta",
-          input: "number",
-          inputValidator: (value) => !value && "Por favor ingrese un valor"
-        });
-
-        if (valorInput.isConfirmed) {
-          valorVenta = parseFloat(valorInput.value);
-        }
-      }
-
-      // Update in database
-      const { error } = await supabase
-        .from("visitas")
-        .update({
-          estado: "realizada",
-          detalles_visita: detalles,
-          valor_venta: valorVenta,
-          fecha_realizacion: new Date().toISOString()
-        })
-        .eq("id", visita.id);
-
-      if (error) throw error;
-
-      Swal.fire("Éxito", "Visita marcada como realizada", "success");
-      setVisitas(prev => prev.filter(v => v.id !== visita.id));
-      await fetchTodayStats();
-
-    } catch (error) {
-      console.error("Error al realizar la visita:", error);
-      Swal.fire("Error", "No se pudo actualizar la visita", "error");
-    }
-  };
-
-  const handleReprogramarVisita = async (visita) => {
-    try {
-      // Confirmation
-      const willReprogam = await Swal.fire({
-        title: "Confirmar",
-        text: "¿Está seguro que desea reprogramar la visita?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sí",
-        cancelButtonText: "No"
-      });
-
-      if (!willReprogam.isConfirmed) return;
-
-      // Get reason
-      const motivoInput = await Swal.fire({
-        title: "Motivo",
-        text: "¿Por qué se reprograma la visita?",
-        input: "textarea",
-        inputValidator: (value) => !value && "Por favor ingrese el motivo"
-      });
-
-      if (!motivoInput.isConfirmed) return;
-
-      // Update in database
-      const { error } = await supabase
-        .from("visitas")
-        .update({
-          estado: "reprogramada",
-          detalles: motivoInput.value,
-          fecha_reprogramacion: new Date().toISOString()
-        })
-        .eq("id", visita.id);
-
-      if (error) throw error;
-
-      Swal.fire("Éxito", "Visita reprogramada correctamente", "success");
-      setVisitas(prev => prev.filter(v => v.id !== visita.id));
-      await fetchTodayStats();
-
-    } catch (error) {
-      console.error("Error al reprogramar la visita:", error);
-      Swal.fire("Error", "No se pudo reprogramar la visita", "error");
-    }
-  };
-
   return (
-    <div className="p-4 mt-20">
-      <h1 className="text-2xl font-bold mb-4">Dashboard Asesor</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-8 mt-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-center">Dashboard Asesor</h1>
+        <p className="text-center text-gray-400">Gestión de visitas en tiempo real</p>
+      </header>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-green-100 p-4 rounded-lg shadow">
-          <h3 className="text-green-800 font-semibold">Visitas Realizadas</h3>
-          <p className="text-2xl font-bold text-green-600">
-            {statsHoy.realizadas}
-          </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-gradient-to-br from-green-800 to-green-600 p-6 rounded-lg shadow-md flex items-center">
+          <ClipboardCheck className="w-10 h-10 text-green-200 mr-4" />
+          <div>
+            <h3 className="text-xl font-semibold">Realizadas</h3>
+            <p className="text-3xl font-bold">{statsHoy.realizadas}</p>
+          </div>
         </div>
-        <div className="bg-yellow-100 p-4 rounded-lg shadow">
-          <h3 className="text-yellow-800 font-semibold">Visitas Pendientes</h3>
-          <p className="text-2xl font-bold text-yellow-600">
-            {statsHoy.pendientes}
-          </p>
+        <div className="bg-gradient-to-br from-yellow-800 to-yellow-600 p-6 rounded-lg shadow-md flex items-center">
+          <BarChart className="w-10 h-10 text-yellow-200 mr-4" />
+          <div>
+            <h3 className="text-xl font-semibold">Pendientes</h3>
+            <p className="text-3xl font-bold">{statsHoy.pendientes}</p>
+          </div>
         </div>
-        <div className="bg-red-100 p-4 rounded-lg shadow">
-          <h3 className="text-red-800 font-semibold">
-            Visitas Reprogramadas
-          </h3>
-          <p className="text-2xl font-bold text-red-600">
-            {statsHoy.reprogramadas}
-          </p>
+        <div className="bg-gradient-to-br from-red-800 to-red-600 p-6 rounded-lg shadow-md flex items-center">
+          <RefreshCcw className="w-10 h-10 text-red-200 mr-4" />
+          <div>
+            <h3 className="text-xl font-semibold">Reprogramadas</h3>
+            <p className="text-3xl font-bold">{statsHoy.reprogramadas}</p>
+          </div>
         </div>
       </div>
 
-      {/* Visits List */}
-      <div className="bg-white p-4 rounded-lg shadow mb-4">
-        <h2 className="text-xl font-semibold mb-2">Visitas Pendientes</h2>
-
-        <div className="flex space-x-4 mb-4">
+      {/* Visits Table */}
+      <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 className="text-2xl font-semibold mb-4">Visitas Pendientes</h2>
+        <div className="flex space-x-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Fecha inicial:
-            </label>
+            <label className="block text-sm font-medium text-gray-300">Fecha Inicial</label>
             <input
               type="date"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2 w-full"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Fecha final:
-            </label>
+            <label className="block text-sm font-medium text-gray-300">Fecha Final</label>
             <input
               type="date"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 bg-gray-900 text-gray-300 border border-gray-600 rounded-md p-2 w-full"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
         </div>
-
         {loading ? (
-          <p>Cargando visitas...</p>
+          <p className="text-gray-400">Cargando visitas...</p>
         ) : visitas.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-4">
             {visitas.map((visita) => (
-              <li key={visita.id} className="border-b pb-2">
-                <p className="font-semibold">{visita.cliente}</p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Cliente: </span> {visita.nombre}
-                  <span className="font-bold ml-2">Ciudad: </span> {visita.ciudad}
-                  <span className="font-bold ml-2">Barrio: </span> {visita.barrio}
-                  <span className="font-bold ml-2">Dirección: </span> {visita.direccion}
-                  <span className="font-bold ml-2">Teléfono: </span> {visita.telefono}
-                </p>
-                <div className="flex space-x-2 mt-2">
-                  <button
-                    onClick={() => handleRealizarVisita(visita)}
-                    className="bg-blue-500 text-white rounded px-3 py-1"
-                  >
-                    Marcar como Realizada
+              <li key={visita.id} className="p-4 bg-gray-700 rounded-lg flex justify-between items-center">
+                <div>
+                  <h3 className="font-bold">{visita.cliente}</h3>
+                  <p className="text-gray-400 text-sm">{visita.direccion}</p>
+                </div>
+                <div className="flex space-x-4">
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">
+                    Realizar
                   </button>
-                  <button
-                    onClick={() => handleReprogramarVisita(visita)}
-                    className="bg-yellow-500 text-white rounded px-3 py-1"
-                  >
+                  <button className="bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg px-4 py-2">
                     Reprogramar
                   </button>
                 </div>
@@ -272,7 +140,7 @@ const DashboardAsesor = () => {
             ))}
           </ul>
         ) : (
-          <p>No hay visitas pendientes en este rango de fechas.</p>
+          <p className="text-gray-400">No hay visitas pendientes en este rango.</p>
         )}
       </div>
     </div>
