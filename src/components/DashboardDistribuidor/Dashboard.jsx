@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../Functions/CreateClient";
 import { useAuth } from "../../constants/AuthContext";
 import { Users, TrendingUp, Calendar } from "lucide-react";
@@ -7,7 +7,7 @@ const DashboardDistribuidor = () => {
   const [televentas, setTeleventas] = useState([]);
   const [asesores, setAsesores] = useState([]);
   const [ventas, setVentas] = useState([]);
-  const [citas, setCitas] = useState([]);
+  const [visitas, setVisitas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dateRange, setDateRange] = useState({
@@ -35,7 +35,7 @@ const DashboardDistribuidor = () => {
         if (distribuidorError) throw distribuidorError;
   
         // Fetch all data in Promise.all
-        const [ventasResponse, profilesResponse, citasResponse, visitasResponse] = await Promise.all([
+        const [ventasResponse, profilesResponse,  visitasResponse] = await Promise.all([
           supabase
             .from("visitas")
             .select("valor_venta")
@@ -46,7 +46,7 @@ const DashboardDistribuidor = () => {
             .eq("distribuidor", distribuidorData.distribuidor)
             .in("cargo", ["televentas", "asesor"]),
           supabase
-            .from("citas")
+            .from("visitas")
             .select("*")
             .eq("distribuidor", distribuidorData.distribuidor),
           supabase
@@ -58,7 +58,6 @@ const DashboardDistribuidor = () => {
         // Check for errors in each response
         if (ventasResponse.error) throw ventasResponse.error;
         if (profilesResponse.error) throw profilesResponse.error;
-        if (citasResponse.error) throw citasResponse.error;
         if (visitasResponse.error) throw visitasResponse.error;
   
         const televentasData = profilesResponse.data.filter(
@@ -71,7 +70,7 @@ const DashboardDistribuidor = () => {
         setTeleventas(televentasData);
         setAsesores(asesoresData);
         setVentas(ventasResponse.data || []);
-        setCitas(citasResponse.data || []);
+        setVisitas(visitasResponse.data || []);
       } catch (error) {
         console.error("Fetch error:", error);
         setError(error.message);
@@ -91,15 +90,15 @@ const DashboardDistribuidor = () => {
   };
 
   const getCitasColor = (asesor) => {
-    const asesorCitas = citas.filter((cita) => cita.asesor_id === asesor.id);
+    const asesorCitas = visitas.filter((visita) => visita.asesor_id === asesor.id);
     const pendientes = asesorCitas.filter(
-      (cita) => cita.estado === "pendiente"
+      (visita) => visita.estado === "pendiente"
     ).length;
     const reprogramadas = asesorCitas.filter(
-      (cita) => cita.estado === "reprogramar"
+      (visita) => visita.estado === "reprogramar"
     ).length;
     const realizadas = asesorCitas.filter(
-      (cita) => cita.estado === "realizada"
+      (visita) => visita.estado === "realizada"
     ).length;
 
     if (pendientes > Math.max(reprogramadas, realizadas))
@@ -199,7 +198,7 @@ const DashboardDistribuidor = () => {
           <div>
             <h3 className="text-xl font-semibold">Citas Realizadas</h3>
             <p className="text-3xl font-bold">
-              {citas.filter((cita) => cita.estado === "realizada").length}
+              {visitas.filter((visita) => visita.estado === "realizada").length}
             </p>
           </div>
         </div>
@@ -208,7 +207,7 @@ const DashboardDistribuidor = () => {
           <div>
             <h3 className="text-xl font-semibold">Citas Pendientes</h3>
             <p className="text-3xl font-bold">
-              {citas.filter((cita) => cita.estado === "pendiente").length}
+              {visitas.filter((visita) => visita.estado === "pendiente").length}
             </p>
           </div>
         </div>
@@ -244,7 +243,7 @@ const DashboardDistribuidor = () => {
                       <p className="text-sm text-gray-200">
                         Citas:{" "}
                         {
-                          citas.filter((cita) => cita.asesor_id === asesor.id)
+                          visitas.filter((visita) => visita.asesor_id === asesor.id)
                             .length
                         }
                       </p>
