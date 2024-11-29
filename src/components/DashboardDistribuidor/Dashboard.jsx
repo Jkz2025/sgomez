@@ -133,6 +133,7 @@ const DashboardDistribuidor = () => {
     return ventas
       .filter((venta) => venta.asesor === asesor.id)
       .reduce((sum, venta) => {
+        // Ensure we're adding a number and handle potential null/undefined
         const ventaValue = venta.valor_venta || 0;
         return sum + ventaValue;
       }, 0);
