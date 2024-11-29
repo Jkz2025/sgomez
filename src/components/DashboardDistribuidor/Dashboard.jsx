@@ -170,12 +170,18 @@ const DashboardDistribuidor = () => {
           <div>
             <h3 className="text-xl font-semibold">Ventas Totales</h3>
             <p className="text-3xl font-bold">
-              ${totalVentasPesos.toLocaleString()} COP
-              <br />
-              <span className="text-xl text-blue-200">
-                (${totalVentasUSD.toLocaleString()} USD)
-              </span>
-            </p>
+  ${totalVentasPesos.toLocaleString('es-CO', { 
+    minimumFractionDigits: 0, 
+    maximumFractionDigits: 0 
+  })} COP
+  <br />
+  <span className="text-xl text-blue-200">
+    (${totalVentasUSD.toLocaleString('es-CO', { 
+      minimumFractionDigits: 0, 
+      maximumFractionDigits: 0 
+    })} USD)
+  </span>
+</p>
           </div>
         </div>
         <div className="bg-gradient-to-br from-green-800 to-green-600 p-6 rounded-lg shadow-md flex items-center">
@@ -225,13 +231,19 @@ const DashboardDistribuidor = () => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-white">
-                        ${ventasTotal.toLocaleString()} COP
-                        <br />
-                        <span className="text-sm text-gray-200">
-                          (${ventasUSD.toLocaleString()} USD)
-                        </span>
-                      </p>
+                    <p className="font-bold text-white">
+  ${ventasTotal.toLocaleString('es-CO', { 
+    minimumFractionDigits: 0, 
+    maximumFractionDigits: 0 
+  })} COP
+  <br />
+  <span className="text-sm text-gray-200">
+    (${ventasUSD.toLocaleString('es-CO', { 
+      minimumFractionDigits: 0, 
+      maximumFractionDigits: 0 
+    })} USD)
+  </span>
+</p>
                       <p className="text-sm text-gray-200">
                         Citas: {visitasTotal}
                       </p>
