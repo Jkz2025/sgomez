@@ -34,10 +34,10 @@ const DashboardDistribuidor = () => {
 
         if (distribuidorError) throw distribuidorError;
 
-        //Ahor ausamos distribuidor data en las consultas
+        //Ahor ausamos distribuidor data en las consultasda
         const { data: ventasResponse } = await supabase
           .from("visitas")
-          .select("*")
+          .select("valor_venta")
           .eq("distribucion", distribuidorData.distribuidor);
 
         const [profilesResponse, citasResponse] = await Promise.all([
