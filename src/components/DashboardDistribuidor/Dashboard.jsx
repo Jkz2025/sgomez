@@ -98,9 +98,9 @@ const DashboardDistribuidor = () => {
   }, [session, dateRange]);
 
   const getVentasColor = (monto) => {
-    if (monto < 3000) return "from-red-800 to-red-600";
-    if (monto < 5000) return "from-yellow-800 to-yellow-600";
-    if (monto < 10000) return "from-green-800 to-green-600";
+    if (monto < 120000) return "from-red-800 to-red-600";
+    if (monto < 20000) return "from-yellow-800 to-yellow-600";
+    if (monto < 40000) return "from-green-800 to-green-600";
     return "from-blue-800 to-blue-600";
   };
 
