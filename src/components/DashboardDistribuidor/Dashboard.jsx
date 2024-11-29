@@ -20,10 +20,10 @@ const DashboardDistribuidor = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!session?.user?.id) return;
-
+  
       try {
         setIsLoading(true);
-
+  
         // Obtenemos primero el distribuidor
         const { data: distribuidorData, error: distribuidorError } =
           await supabase
@@ -31,49 +31,55 @@ const DashboardDistribuidor = () => {
             .select("*")
             .eq("id", session.user.id)
             .single();
-
+  
         if (distribuidorError) throw distribuidorError;
-
-        //Ahor ausamos distribuidor data en las consultasda
-        const { data: ventasResponse } = await supabase
-          .from("visitas")
-          .select("valor_venta")
-          .eq("distribucion", distribuidorData.distribuidor);
-
-        const [profilesResponse, citasResponse] = await Promise.all([
+  
+        // Fetch all data in Promise.all
+        const [ventasResponse, profilesResponse, citasResponse, visitasResponse] = await Promise.all([
+          supabase
+            .from("visitas")
+            .select("valor_venta")
+            .eq("distribucion", distribuidorData.distribuidor),
           supabase
             .from("profiles")
             .select("*")
             .eq("distribuidor", distribuidorData.distribuidor)
             .in("cargo", ["televentas", "asesor"]),
           supabase
-            .from("visitas")
-            .select("*")
-            .eq("distribucion", distribuidorData.distribuidor),
-          supabase
             .from("citas")
             .select("*")
             .eq("distribucion", distribuidorData.distribuidor),
+          supabase
+            .from("visitas")
+            .select("*")
+            .eq("distribucion", distribuidorData.distribuidor)
         ]);
-
+  
+        // Check for errors in each response
+        if (ventasResponse.error) throw ventasResponse.error;
+        if (profilesResponse.error) throw profilesResponse.error;
+        if (citasResponse.error) throw citasResponse.error;
+        if (visitasResponse.error) throw visitasResponse.error;
+  
         const televentasData = profilesResponse.data.filter(
           (profile) => profile.cargo === "televentas"
         );
         const asesoresData = profilesResponse.data.filter(
           (profile) => profile.cargo === "asesor"
         );
-
+  
         setTeleventas(televentasData);
         setAsesores(asesoresData);
         setVentas(ventasResponse.data || []);
         setCitas(citasResponse.data || []);
       } catch (error) {
+        console.error("Fetch error:", error);
         setError(error.message);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
   }, [session]);
 
