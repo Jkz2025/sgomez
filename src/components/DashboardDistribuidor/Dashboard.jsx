@@ -24,9 +24,9 @@ const DashboardDistribuidor = () => {
 
   // Helper function to convert Colombian Pesos to USD
   const convertPesosToUSD = (pesoAmount) => {
-    // Assuming current exchange rate (this should be updated with a real-time API)
-    const exchangeRate = 4000; // Example rate, replace with current rate
-    return pesoAmount / exchangeRate;
+    const numericAmount = Number(pesoAmount);
+    const exchangeRate = 4000; // Example rate
+    return isNaN(numericAmount) ? 0 : numericAmount / exchangeRate;
   };
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const DashboardDistribuidor = () => {
         const [ventasResponse, profilesResponse, visitasResponse] = await Promise.all([
           supabase
             .from("visitas")
-            .select("*")
+            .select("valor_venta")
             .eq("distribuidor", distribuidorData.distribuidor)
             .gte("fecha", startDate.toISOString())
             .lte("fecha", endDate.toISOString()),
@@ -133,7 +133,6 @@ const DashboardDistribuidor = () => {
     return ventas
       .filter((venta) => venta.asesor === asesor.id)
       .reduce((sum, venta) => {
-        // Ensure we're adding a number and handle potential null/undefined
         const ventaValue = venta.valor_venta || 0;
         return sum + ventaValue;
       }, 0);
@@ -150,7 +149,6 @@ const DashboardDistribuidor = () => {
 
   // Total ventas calculations
   const totalVentasPesos = ventas.reduce((sum, venta) => {
-    // Ensure we're adding a number and handle potential null/undefined
     const ventaValue = venta.valor_venta || 0;
     return sum + ventaValue;
   }, 0);
