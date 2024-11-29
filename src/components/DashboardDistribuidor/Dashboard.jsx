@@ -54,7 +54,7 @@ const DashboardDistribuidor = () => {
           supabase
             .from("visitas")
             .select("*")
-            .eq("distribuidor", distribuidorData.distribuidor)
+            .eq("distribuidor")
             .gte("fecha", startDate.toISOString())
             .lte("fecha", endDate.toISOString()),
           supabase
