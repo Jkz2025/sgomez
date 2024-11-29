@@ -39,7 +39,7 @@ const DashboardDistribuidor = () => {
           supabase
             .from("visitas")
             .select("valor_venta")
-            .eq("distribucion", distribuidorData.distribuidor),
+            .eq("distribuidor", distribuidorData.distribuidor),
           supabase
             .from("profiles")
             .select("*")
@@ -48,11 +48,11 @@ const DashboardDistribuidor = () => {
           supabase
             .from("citas")
             .select("*")
-            .eq("distribucion", distribuidorData.distribuidor),
+            .eq("distribuidor", distribuidorData.distribuidor),
           supabase
             .from("visitas")
             .select("*")
-            .eq("distribucion", distribuidorData.distribuidor)
+            .eq("distribuidor", distribuidorData.distribuidor)
         ]);
   
         // Check for errors in each response
