@@ -121,30 +121,39 @@ const DashboardTeleventas = () => {
         return;
       }
   
-      let result;
-      
-      if (editingVisita) {
-        // Actualizar visita existente
-        result = await supabase
-          .from("visitas")
-          .update({
-            ...formData,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", editingVisita.id);
-      } else {
-        // Crear nueva visita
-        result = await supabase
-          .from("visitas")
-          .insert({
-            ...formData,
-            televentas_id: session.user.id,
-            asesor_name: formData.asesor_name,
-            estado: "pendiente",
-            distribuidor: session.user.distribuidor,
-            created_at: new Date().toISOString()
-          });
-      }
+         // Fetch the distributor for the current user
+    const { data: userData, error: userError } = await supabase
+    .from("profiles")
+    .select("distribuidor")
+    .eq("id", session.user.id)
+    .single();
+
+  if (userError) throw userError;
+
+  let result;
+  
+  if (editingVisita) {
+    // Actualizar visita existente
+    result = await supabase
+      .from("visitas")
+      .update({
+        ...formData,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", editingVisita.id);
+  } else {
+    // Crear nueva visita
+    result = await supabase
+      .from("visitas")
+      .insert({
+        ...formData,
+        televentas_id: session.user.id,
+        asesor_name: formData.asesor_name,
+        estado: "pendiente",
+        distribuidor: userData.distribuidor, // Insertar el distribuidor aquí
+        created_at: new Date().toISOString()
+      });
+  }
   
       if (result.error) throw result.error;
   
