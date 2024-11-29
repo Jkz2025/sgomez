@@ -54,7 +54,7 @@ const DashboardDistribuidor = () => {
           supabase
             .from("visitas")
             .select("*")
-            .eq("distribuidor")
+            .eq("distribuidor", distribuidorData.distribuidor)
             .gte("fecha", startDate.toISOString())
             .lte("fecha", endDate.toISOString()),
           supabase
@@ -105,7 +105,7 @@ const DashboardDistribuidor = () => {
   };
 
   const getCitasColor = (asesor) => {
-    const asesorCitas = visitas.filter((visita) => visita.asesor_id === asesor.id);
+    const asesorCitas = visitas.filter((visita) => visita.asesor === asesor.id);
     const pendientes = asesorCitas.filter(
       (visita) => visita.estado === "pendiente"
     ).length;
@@ -127,12 +127,12 @@ const DashboardDistribuidor = () => {
 
   const getVentasTotal = (asesor) => {
     return ventas
-      .filter((venta) => venta.asesor_id === asesor.id)
+      .filter((venta) => venta.asesor === asesor.id)
       .reduce((sum, venta) => sum + (venta.valor_venta || 0), 0);
   };
 
   const getVisitasTotal = (asesor) => {
-    return visitas.filter((visita) => visita.asesor_id === asesor.id).length;
+    return visitas.filter((visita) => visita.asesor === asesor.id).length;
   };
 
   if (error)
