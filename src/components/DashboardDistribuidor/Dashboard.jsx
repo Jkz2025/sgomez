@@ -98,14 +98,14 @@ const DashboardDistribuidor = () => {
   }, [session, dateRange]);
 
   const getVentasColor = (monto) => {
-    if (monto < 120000) return "from-red-800 to-red-600";
-    if (monto < 20000) return "from-yellow-800 to-yellow-600";
-    if (monto < 40000) return "from-green-800 to-green-600";
+    if (monto < 3000) return "from-red-800 to-red-600";
+    if (monto < 5000) return "from-yellow-800 to-yellow-600";
+    if (monto < 10000) return "from-green-800 to-green-600";
     return "from-blue-800 to-blue-600";
   };
 
   const getCitasColor = (asesor) => {
-    const asesorCitas = visitas.filter((visita) => visita.asesor_id === asesor.id);
+    const asesorCitas = visitas.filter((visita) => visita.asesor === asesor.id);
     const pendientes = asesorCitas.filter(
       (visita) => visita.estado === "pendiente"
     ).length;
@@ -127,12 +127,12 @@ const DashboardDistribuidor = () => {
 
   const getVentasTotal = (asesor) => {
     return ventas
-      .filter((venta) => venta.asesor_id === asesor.id)
+      .filter((venta) => venta.asesor === asesor.id)
       .reduce((sum, venta) => sum + (venta.valor_venta || 0), 0);
   };
 
   const getVisitasTotal = (asesor) => {
-    return visitas.filter((visita) => visita.asesor_id === asesor.id).length;
+    return visitas.filter((visita) => visita.asesor === asesor.id).length;
   };
 
   if (error)
