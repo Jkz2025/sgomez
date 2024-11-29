@@ -10,12 +10,24 @@ const DashboardDistribuidor = () => {
   const [visitas, setVisitas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Set default date range to current month
+  const today = new Date();
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  
   const [dateRange, setDateRange] = useState({
-    startDate: "",
-    endDate: "",
+    startDate: firstDayOfMonth.toISOString().split('T')[0],
+    endDate: today.toISOString().split('T')[0],
   });
 
   const { session } = useAuth();
+
+  // Helper function to convert Colombian Pesos to USD
+  const convertPesosToUSD = (pesoAmount) => {
+    // Assuming current exchange rate (this should be updated with a real-time API)
+    const exchangeRate = 4000; // Example rate, replace with current rate
+    return pesoAmount / exchangeRate;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,11 +47,16 @@ const DashboardDistribuidor = () => {
         if (distribuidorError) throw distribuidorError;
   
         // Fetch all data in Promise.all
-        const [ventasResponse, profilesResponse,  visitasResponse] = await Promise.all([
+        const startDate = new Date(dateRange.startDate);
+        const endDate = new Date(dateRange.endDate);
+
+        const [ventasResponse, profilesResponse, visitasResponse] = await Promise.all([
           supabase
             .from("visitas")
-            .select("valor_venta")
-            .eq("distribuidor", distribuidorData.distribuidor),
+            .select("*")
+            .eq("distribuidor", distribuidorData.distribuidor)
+            .gte("fecha", startDate.toISOString())
+            .lte("fecha", endDate.toISOString()),
           supabase
             .from("profiles")
             .select("*")
@@ -48,11 +65,9 @@ const DashboardDistribuidor = () => {
           supabase
             .from("visitas")
             .select("*")
-            .eq("distribuidor", distribuidorData.distribuidor),
-          supabase
-            .from("visitas")
-            .select("*")
             .eq("distribuidor", distribuidorData.distribuidor)
+            .gte("fecha", startDate.toISOString())
+            .lte("fecha", endDate.toISOString())
         ]);
   
         // Check for errors in each response
@@ -80,7 +95,7 @@ const DashboardDistribuidor = () => {
     };
   
     fetchData();
-  }, [session]);
+  }, [session, dateRange]);
 
   const getVentasColor = (monto) => {
     if (monto < 3000) return "from-red-800 to-red-600";
@@ -111,26 +126,21 @@ const DashboardDistribuidor = () => {
   };
 
   const getVentasTotal = (asesor) => {
-    // Verifica que las fechas sean válidas
-    if (!dateRange.startDate || !dateRange.endDate) return 0;
+    return ventas
+      .filter((venta) => venta.asesor_id === asesor.id)
+      .reduce((sum, venta) => sum + (venta.valor_venta || 0), 0);
+  };
 
-    const startDate = new Date(dateRange.startDate);
-    const endDate = new Date(dateRange.endDate);
-
-    return (
-      ventas
-        .filter(
-          (venta) =>
-            venta.asesor_id === asesor.id &&
-            new Date(venta.fecha) >= startDate &&
-            new Date(venta.fecha) <= endDate
-        )
-        .reduce((sum, venta) => sum + (venta.valor_venta || 0), 0) / 4000
-    ); // Convierte a dólares
+  const getVisitasTotal = (asesor) => {
+    return visitas.filter((visita) => visita.asesor_id === asesor.id).length;
   };
 
   if (error)
     return <div className="text-red-500 text-center p-4">Error: {error}</div>;
+
+  // Total ventas calculations
+  const totalVentasPesos = ventas.reduce((sum, venta) => sum + (venta.valor_venta || 0), 0);
+  const totalVentasUSD = convertPesosToUSD(totalVentasPesos);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-8 mt-8">
@@ -178,18 +188,11 @@ const DashboardDistribuidor = () => {
           <div>
             <h3 className="text-xl font-semibold">Ventas Totales</h3>
             <p className="text-3xl font-bold">
-              $
-              {ventas
-                .filter(
-                  (venta) =>
-                    dateRange.startDate &&
-                    dateRange.endDate && // Valida el rango
-                    new Date(venta.fecha) >= new Date(dateRange.startDate) &&
-                    new Date(venta.fecha) <= new Date(dateRange.endDate)
-                )
-                .reduce((sum, venta) => sum + (venta.valor_venta || 0), 0) /
-                (4000) // Convierte a dólares
-                  .toLocaleString()}
+              ${totalVentasPesos.toLocaleString()} COP
+              <br />
+              <span className="text-xl text-blue-200">
+                (${totalVentasUSD.toLocaleString()} USD)
+              </span>
             </p>
           </div>
         </div>
@@ -220,11 +223,14 @@ const DashboardDistribuidor = () => {
           <div className="space-y-4 max-h-[400px] overflow-y-auto">
             {asesores.map((asesor) => {
               const ventasTotal = getVentasTotal(asesor);
+              const ventasUSD = convertPesosToUSD(ventasTotal);
+              const visitasTotal = getVisitasTotal(asesor);
+              
               return (
                 <div
                   key={asesor.id}
                   className={`bg-gradient-to-br ${getVentasColor(
-                    ventasTotal
+                    ventasUSD
                   )} ${getCitasColor(asesor)} p-4 rounded-lg shadow-md`}
                 >
                   <div className="flex justify-between items-center">
@@ -238,14 +244,14 @@ const DashboardDistribuidor = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-white">
-                        ${ventasTotal.toLocaleString()}
+                        ${ventasTotal.toLocaleString()} COP
+                        <br />
+                        <span className="text-sm text-gray-200">
+                          (${ventasUSD.toLocaleString()} USD)
+                        </span>
                       </p>
                       <p className="text-sm text-gray-200">
-                        Citas:{" "}
-                        {
-                          visitas.filter((visita) => visita.asesor_id === asesor.id)
-                            .length
-                        }
+                        Citas: {visitasTotal}
                       </p>
                     </div>
                   </div>
