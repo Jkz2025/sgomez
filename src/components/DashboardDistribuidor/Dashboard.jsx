@@ -53,7 +53,7 @@ const DashboardDistribuidor = () => {
         const [ventasResponse, profilesResponse, visitasResponse] = await Promise.all([
           supabase
             .from("visitas")
-            .select("valor_venta")
+            .select("*")
             .eq("distribuidor", distribuidorData.distribuidor)
             .gte("fecha", startDate.toISOString())
             .lte("fecha", endDate.toISOString()),
