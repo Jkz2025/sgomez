@@ -141,6 +141,7 @@ const DashboardTeleventas = () => {
             televentas_id: session.user.id,
             asesor_name: formData.asesor_name,
             estado: "pendiente",
+            distribuidor: session.user.distribuidor,
             created_at: new Date().toISOString()
           });
       }
