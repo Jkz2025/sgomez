@@ -174,7 +174,7 @@ const AuthFlow = () => {
       </h1>
       {!cargo ? (
         <div>
-          <h2 className="text-xl mb-2 text-center">Selecciona tu cargo:</h2>
+          <h2 className="text-xl mb-2 text-center text-black">Selecciona tu cargo:</h2>
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 justify-center">
             <button
               onClick={() => handleCargoSelection("asesor")}
@@ -204,7 +204,7 @@ const AuthFlow = () => {
             placeholder="Nombre"
             value={userInfo.nombre}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
           <input
@@ -213,7 +213,7 @@ const AuthFlow = () => {
             placeholder="Apellido"
             value={userInfo.apellido}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
                <input
@@ -222,7 +222,7 @@ const AuthFlow = () => {
             placeholder="Codigo"
             value={userInfo.codigo}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
           <input
@@ -231,7 +231,7 @@ const AuthFlow = () => {
             placeholder="Correo"
             value={userInfo.correo}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
           <input
@@ -240,14 +240,14 @@ const AuthFlow = () => {
             placeholder="Teléfono"
             value={userInfo.telefono}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
           <select
             name="distribuidor"
             value={userInfo.distribuidor}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           >
             <option value="">Selecciona un distribuidor</option>

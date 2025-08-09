@@ -3,6 +3,7 @@ import { Home, Layers, Calculator, Settings, LogOut, Menu, X } from 'lucide-reac
 import { useAuth } from "../constants/AuthContext";
 import { supabase } from "./Functions/CreateClient";
 import logo from "../assets/Logo.png";
+import { UserPlus } from 'lucide-react';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -113,9 +114,11 @@ const Navbar = () => {
           ) : (
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
               <NavLink href="/catalogo" icon={Layers} label="Catalogo" />
-              {/* <NavLink href="/Galeria" icon={Home} label="Galeria" /> */}
+              {/* <NavLink href="/Galeria" icon={Home} label="Galeria" /> */}   
               <NavLink href="/calculadora" icon={Calculator} label="Calculadora" />
               <NavLink href="/ProfileConfiguration" icon={Settings} label="Configuracion" />
+              <NavLink href="/panel-asesor" icon={UserPlus} label="Panel Asesor" />
+
               <button
                 onClick={async () => {
                   const { error } = await supabase.auth.signOut();

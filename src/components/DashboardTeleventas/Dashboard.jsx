@@ -4,7 +4,6 @@ import { useAuth } from "../../constants/AuthContext";
 import { 
   Calendar, 
   UserPlus, 
-  CheckSquare, 
   RefreshCw, 
   Edit2 
 } from "lucide-react";
@@ -151,7 +150,8 @@ const DashboardTeleventas = () => {
         asesor_name: formData.asesor_name,
         estado: "pendiente",
         distribuidor: userData.distribuidor, // Insertar el distribuidor aquí
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
   }
   
@@ -633,6 +633,7 @@ export default DashboardTeleventas;
       
 //       if (editingVisita) {
 //         // Actualizar visita existente
+
 //         result = await supabase
 //           .from("visitas")
 //           .update({
