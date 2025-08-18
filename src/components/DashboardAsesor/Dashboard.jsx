@@ -300,7 +300,7 @@ const DashboardAsesor = () => {
                     : "bg-yellow-900/30"
                 }`}
               >
-                <h3 className="font-bold text-lg text-white">{visita.nombre}</h3>
+                <h3 className="font-bold text-lg text-white">{visita.cliente}</h3>
                 <p><span className="font-medium text-gray-400">Direccion:</span> {visita.ciudad}, {visita.barrio}, {visita.direccion}</p>
                 <p><span className="font-medium text-gray-400">Telefono:</span> {visita.telefono}</p>
                 <p><span className="font-medium text-gray-400">Fecha:</span> {visita.fecha}</p>

@@ -13,7 +13,7 @@ const DashboardTeleventas = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     asesor: "",
-    nombre: "",
+    cliente: "",
     direccion: "",
     telefono: "",
     barrio: "",
@@ -103,7 +103,7 @@ const DashboardTeleventas = () => {
     try {
       // Validar campos vacíos
       const requiredFields = [
-        'asesor', 'nombre', 'ciudad', 'direccion', 
+        'asesor', 'cliente', 'ciudad', 'direccion', 
         'telefono', 'fecha', 'hora', 'tipoVisita'
       ];
       
@@ -166,7 +166,7 @@ const DashboardTeleventas = () => {
       setFormData({
         asesor: "",
         asesor_name: "",
-        nombre: "",
+        cliente: "",
         direccion: "",
         telefono: "",
         barrio: "",
@@ -283,7 +283,7 @@ const DashboardTeleventas = () => {
     </select>
     <input
       type="text"
-      name="nombre"
+      name="cliente"
       placeholder="Nombre Cliente"
       value={formData.cliente}
       onChange={handleInputChange}
@@ -472,7 +472,7 @@ const DashboardTeleventas = () => {
                     'bg-yellow-900/30'}`}
               >
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-bold text-lg">{visita.nombre}</h3>
+                  <h3 className="font-bold text-lg">{visita.cliente}</h3>
                   <span className={`px-2 py-1 rounded text-xs font-semibold 
                     ${visita.estado === 'pendiente' ? 'bg-blue-500/50' : 
                       visita.estado === 'realizada' ? 'bg-green-500/50' : 
