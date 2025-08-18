@@ -387,7 +387,8 @@ const DashboardTeleventas = () => {
       </label>
     </div>
     {(formData.tipoVisita === "demostracion" ||
-      formData.tipoVisita === "mantenimiento") && (
+      formData.tipoVisita === "mantenimiento" ||
+      formData.tipoVisita === "servicioInicial") && (
       <textarea
         name="detalles"
         placeholder="Detalles"
