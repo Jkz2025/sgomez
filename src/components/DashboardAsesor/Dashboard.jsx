@@ -1,8 +1,9 @@
-import { useFetchVisitas } from "./useFetchVisitas";
+import { useFetchVisitasHook } from "../Functions/useFetchVisitasHook";
 import { useState, useEffect } from "react";
 import { supabase } from "../Functions/CreateClient";
 import Swal from "sweetalert2";
 import { BarChart, ClipboardCheck, RefreshCcw } from "lucide-react";
+
 
 const DashboardAsesor = () => {
   const [statsHoy, setStatsHoy] = useState({
@@ -18,7 +19,7 @@ const DashboardAsesor = () => {
     endDate,
     setStartDate,
     setEndDate,
-  } = useFetchVisitas();
+  } = useFetchVisitasHook();
 
   useEffect(() => {
     fetchVisitas();

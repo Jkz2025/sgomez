@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { fetchInventario } from "../Functions/FetchInventario";
+import { fetchInventario } from "../Fetchs/FetchInventario";
 
 export function useFetchInventario(setInventario) {
   useEffect(() => {

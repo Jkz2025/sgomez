@@ -9,6 +9,39 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { session, loading } = useAuth();
   const [userRole, setUserRole] = useState(null);
+  const [sessionAsesor, setSessionAsesor] = useState(false)
+  const [sessionTeleventas, setSessionTeleventas] = useState(false)
+  const [sessionDistribuidor, setSessionDistribuidor] = useState(false)
+  const [profiles, setProfiles] = useState([])
+  const [profilesLoaded, setProfilesLoaded] = useState(false)
+
+  // Cargar perfiles y verificar rol
+  useEffect(() => {
+    const loadProfiles = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session?.user.id)
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          if (data.cargo === 'asesor') setSessionAsesor(true);
+          if (data.cargo === 'televentas') setSessionTeleventas(true);
+          if (data.cargo === 'distribuidor') setSessionDistribuidor(true);
+        }
+        setProfilesLoaded(true);
+      } catch (error) {
+        console.error('Error al cargar el perfil:', error);
+      }
+    };
+
+    if (session?.user?.id) {
+      loadProfiles();
+    }
+  }, [session]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -25,10 +58,10 @@ const Navbar = () => {
     </a>
   );
 
-  // Consulta el rango del usuario logueado
+  // Consulta el cargo del usuario logueado
   useEffect(() => {
     const fetchUserRole = async () => {
-      if (session) {
+      if (session?.user?.id) {
         const { data, error } = await supabase
           .from('profiles')
           .select('cargo')
@@ -36,33 +69,26 @@ const Navbar = () => {
           .single();
 
         if (error) {
-          console.error('Error fetching user role:', error);
-        } else {
-          setUserRole(data.rango);
+          console.error('Error al obtener el cargo del usuario:', error);
+        } else if (data) {
+          console.log('Cargo del usuario:', data.cargo); // Para depuración
+          setUserRole(data.cargo);
         }
       }
     };
 
     fetchUserRole();
   }, [session]);
-
   // Función para obtener el link del logo de forma dinámica
   const getLogoLink = () => {
-    if (!session) {
-      return '/'; // Si no hay sesión, ir a home
-    }
+    if (!session) return '/';
     
-    // Si hay sesión, redirigir según el rol
-    switch (userRole) {
-      case 'distribuidor':
-        return '/dashboard-distribuidor';
-      case 'televentas':
-        return '/dashboard-televentas';
-      case 'asesor':
-        return '/dashboard-asesor';
-      default:
-        return '/'; // Ruta por defecto cuando hay sesión pero no se ha cargado el rol
-    }
+    // Usar el estado de sesión para determinar el dashboard
+    if (sessionAsesor) return '/dashboard-asesor';
+    if (sessionTeleventas) return '/dashboard-televentas';
+    if (sessionDistribuidor) return '/dashboard-distribuidor';
+    
+    return '/';
   };
 
   if (loading) {
@@ -94,7 +120,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button 
+        <button
           onClick={toggleMenu}
           className="md:hidden text-blue-200 hover:text-white"
         >
@@ -102,7 +128,7 @@ const Navbar = () => {
         </button>
 
         {/* Desktop/Mobile Navigation */}
-        <div 
+        <div
           className={`fixed md:static top-16 left-0 right-0 
             md:flex md:items-center md:space-x-4 
             ${isMenuOpen ? 'block' : 'hidden'} 
@@ -115,14 +141,25 @@ const Navbar = () => {
               <NavLink href="/" icon={Home} label="Home" />
               <NavLink href="/about" icon={Layers} label="About" />
               <NavLink href="/contact" icon={Calculator} label="Contact" />
+              <NavLink href="/login" icon={UserPlus} label="Inciar Sesion" />
             </div>
           ) : (
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
               <NavLink href="/catalogo" icon={Layers} label="Catalogo" />
               <NavLink href="/calculadora" icon={Calculator} label="Calculadora" />
               <NavLink href="/ProfileConfiguration" icon={Settings} label="Configuracion" />
-              <NavLink href="/panel-asesor" icon={UserPlus} label="Panel Asesor" />
-
+              {sessionAsesor ? (
+                <>
+                  <NavLink href="/panel-asesor" icon={UserPlus} label="Panel Asesor" />
+                  <NavLink href="/dashboard" icon={Home} label="Dashboard" />
+                </>
+              ) : sessionTeleventas ? (
+                <NavLink href="/dashboard-televentas" icon={Home} label="Dashboard" />
+              ) : sessionDistribuidor ? (
+                <NavLink href="/dashboard" icon={Home} label="Dashboard" />
+              ) : (
+                <NavLink href="/dashboard" icon={Home} label="Dashboard" />
+              )}
               <button
                 onClick={async () => {
                   const { error } = await supabase.auth.signOut();

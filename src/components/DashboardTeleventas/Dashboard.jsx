@@ -285,7 +285,7 @@ const DashboardTeleventas = () => {
       type="text"
       name="nombre"
       placeholder="Nombre Cliente"
-      value={formData.nombre}
+      value={formData.cliente}
       onChange={handleInputChange}
       className="mb-4 w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white"
     />

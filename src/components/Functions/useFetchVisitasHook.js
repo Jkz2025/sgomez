@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../Functions/CreateClient";
+import { supabase } from "./CreateClient";
 
-export const useFetchVisitas = () => {
+export const useFetchVisitasHook = () => {
   const [visitas, setVisitas] = useState([]);
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchVisitas();
+    fetchVisitas(); 
   }, [startDate, endDate]);
 
   const fetchVisitas = async () => {

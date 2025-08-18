@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useFetchInventario } from "./Hooks/useFetchInventario";
+import { useFetchInventario } from "./useFetchs/useFetchInventario";
 
 const Inventario = () => {
   const [inventario, setInventario] = useState([]);

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { fetchVisitas } from "../Functions/FetchVisitas";
+import {fetchVisitas} from "../Fetchs/FetchVisitas";
 
 export function useFetchVisitas(setVisitas) {
   useEffect(() => {
