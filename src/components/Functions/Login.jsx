@@ -9,8 +9,7 @@ const Login = () => {
               provider: 'google',
               options: {
                   skipBrowserRedirect: false, // Importante: asegura la redirección del navegador
-                //   redirectTo: `${window.location.origin}/dashboard`,
-                  redirectTo: `https://sgomezsalutem.netlify.app/dashboard`,
+                  redirectTo: `${window.location.origin}/dashboard`,
                   queryParams: {
                       prompt: 'select_account', // Fuerza a mostrar el selector de cuenta
                       access_type: 'offline'
