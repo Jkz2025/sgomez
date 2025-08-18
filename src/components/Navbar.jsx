@@ -8,7 +8,7 @@ import { UserPlus } from 'lucide-react';
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { session, loading } = useAuth();
-  const [userRole, setUserRole] = useState(null); // Guardar el rango del usuario
+  const [userRole, setUserRole] = useState(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -30,7 +30,7 @@ const Navbar = () => {
     const fetchUserRole = async () => {
       if (session) {
         const { data, error } = await supabase
-          .from('profiles') // Cambia 'usuarios' por el nombre de tu tabla en Supabase
+          .from('profiles')
           .select('cargo')
           .eq('id', session.user.id)
           .single();
@@ -46,8 +46,13 @@ const Navbar = () => {
     fetchUserRole();
   }, [session]);
 
-  // Mapear los rangos a las rutas
-  const getDashboardLink = () => {
+  // Función para obtener el link del logo de forma dinámica
+  const getLogoLink = () => {
+    if (!session) {
+      return '/'; // Si no hay sesión, ir a home
+    }
+    
+    // Si hay sesión, redirigir según el rol
     switch (userRole) {
       case 'distribuidor':
         return '/dashboard-distribuidor';
@@ -56,7 +61,7 @@ const Navbar = () => {
       case 'asesor':
         return '/dashboard-asesor';
       default:
-        return '/'; // Ruta por defecto
+        return '/'; // Ruta por defecto cuando hay sesión pero no se ha cargado el rol
     }
   };
 
@@ -77,7 +82,7 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo Area */}
         <div className="flex items-center space-x-3">
-          <a href={getDashboardLink()} className="flex items-center">
+          <a href={getLogoLink()} className="flex items-center">
             <div className="w-10 h-10 bg-blue-500 rounded-full 
               flex items-center justify-center 
               ring-4 ring-blue-900/50">
@@ -114,7 +119,6 @@ const Navbar = () => {
           ) : (
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
               <NavLink href="/catalogo" icon={Layers} label="Catalogo" />
-              {/* <NavLink href="/Galeria" icon={Home} label="Galeria" /> */}   
               <NavLink href="/calculadora" icon={Calculator} label="Calculadora" />
               <NavLink href="/ProfileConfiguration" icon={Settings} label="Configuracion" />
               <NavLink href="/panel-asesor" icon={UserPlus} label="Panel Asesor" />

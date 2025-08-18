@@ -15,7 +15,7 @@ import Inventario from "./components/Inventario";
 import DashboardDistribuidor from "./components/DashboardDistribuidor/Dashboard";
 import DashboardTeleventas from "./components/DashboardTeleventas/Dashboard";
 import Calculadora from "./components/Calculadora/Calculadora";
-
+import DashboardPrincipal from "./components/DashboardPrincipal";
 import ProfileConfiguration from "./components/Configuracion/ProfileConfiguration";
 import PanelAsesor from "./components/PanelAsesor";
 
@@ -30,7 +30,7 @@ function App() {
               <Routes>
                 <Route path="/login" element={<LoginForm />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/" element={<DashboardPrincipal />} />
                 <Route path="/catalogo" element={<Inventario />} />
                 <Route path="/ProfileConfiguration" element={<ProfileConfiguration />} />
                 <Route path="/calculadora" element={<Calculadora />} />
