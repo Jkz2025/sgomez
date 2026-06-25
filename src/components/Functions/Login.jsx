@@ -9,7 +9,7 @@ const Login = () => {
               provider: 'google',
               options: {
                   skipBrowserRedirect: false, // Importante: asegura la redirección del navegador
-                  redirectTo: `${window.location.origin}/dashboard`,
+                  redirectTo: `${window.location.origin}/auth/callback`,
                   queryParams: {
                       prompt: 'select_account', // Fuerza a mostrar el selector de cuenta
                       access_type: 'offline'

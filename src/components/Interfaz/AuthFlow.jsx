@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../Functions/CreateClient";
+import LandingPage from "../LandingPage";
 
 const AuthFlow = () => {
   const [session, setSession] = useState(null);
@@ -18,7 +19,7 @@ const AuthFlow = () => {
   const [userData, setUserData] = useState(null);
 
   const navigate = useNavigate();
-
+console.log(session,"session")
   const checkUserProfile = async (userId) => {
     try {
       const { data, error } = await supabase
@@ -144,11 +145,18 @@ const AuthFlow = () => {
   }, []);
 
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-blue-200">Cargando...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!session) {
-    return <div>No has iniciado sesión.</div>;
+    return <LandingPage />;
   }
 
   if (isFirstLogin === false) {
@@ -168,105 +176,114 @@ const AuthFlow = () => {
   ];
 
   return (
-    <div className="container mx-auto p-4 w-full max-w-full overflow-hidden">
-      <h1 className="text-2xl font-bold mb-4 text-center">
-        Bienvenido <span className="text-blue-500">{userData?.fullName}</span>, completa tu perfil
-      </h1>
-      {!cargo ? (
-        <div>
-          <h2 className="text-xl mb-2 text-center text-black">Selecciona tu cargo:</h2>
-          <div className="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 justify-center">
-            <button
-              onClick={() => handleCargoSelection("asesor")}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 shadow-md transition"
-            >
-              Asesor
-            </button>
-            <button
-              onClick={() => handleCargoSelection("televentas")}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 shadow-md transition"
-            >
-              Televentas
-            </button>
-            <button
-              onClick={() => handleCargoSelection("distribuidor")}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 shadow-md transition"
-            >
-              Distribuidor
-            </button>
-          </div>
+    <div className="min-h-screen pt-20 p-6">
+      <div className="max-w-2xl mx-auto">
+        <div className="glass-card p-8">
+          <h1 className="section-title text-center">
+            Bienvenido <span className="gradient-text">{userData?.fullName}</span>, completa tu perfil
+          </h1>
+          
+          {!cargo ? (
+            <div>
+              <h2 className="text-xl mb-6 text-center text-blue-200">Selecciona tu cargo:</h2>
+              <div className="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 justify-center">
+                <button
+                  onClick={() => handleCargoSelection("asesor")}
+                  className="gradient-button px-6 py-3 rounded-xl flex items-center justify-center space-x-2"
+                >
+                  <span>Asesor</span>
+                </button>
+                <button
+                  onClick={() => handleCargoSelection("televentas")}
+                  className="gradient-button px-6 py-3 rounded-xl flex items-center justify-center space-x-2"
+                >
+                  <span>Televentas</span>
+                </button>
+                <button
+                  onClick={() => handleCargoSelection("distribuidor")}
+                  className="gradient-button px-6 py-3 rounded-xl flex items-center justify-center space-x-2"
+                >
+                  <span>Distribuidor</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                type="text"
+                name="nombre"
+                placeholder="Nombre"
+                value={userInfo.nombre}
+                onChange={handleInputChange}
+                className="input-field"
+                required
+              />
+              <input
+                type="text"
+                name="apellido"
+                placeholder="Apellido"
+                value={userInfo.apellido}
+                onChange={handleInputChange}
+                className="input-field"
+                required
+              />
+              <input
+                type="text"
+                name="codigo"
+                placeholder="Código"
+                value={userInfo.codigo}
+                onChange={handleInputChange}
+                className="input-field"
+                required
+              />
+              <input
+                type="email"
+                name="correo"
+                placeholder="Correo"
+                value={userInfo.correo}
+                onChange={handleInputChange}
+                className="input-field"
+                required
+              />
+              <input
+                type="tel"
+                name="telefono"
+                placeholder="Teléfono"
+                value={userInfo.telefono}
+                onChange={handleInputChange}
+                className="input-field"
+                required
+              />
+              <select
+                name="distribuidor"
+                value={userInfo.distribuidor}
+                onChange={handleInputChange}
+                className="input-field"
+                required
+              >
+                <option value="">Selecciona un distribuidor</option>
+                {distribuidores.map((distribuidor) => (
+                  <option key={distribuidor} value={distribuidor}>
+                    {distribuidor}
+                  </option>
+                ))}
+              </select>
+              <div className="flex space-x-4 justify-center pt-4">
+                <button type="submit" className="gradient-button px-8 py-3 rounded-xl">
+                  Guardar
+                </button>
+                <button 
+                  onClick={closeForm} 
+                  className="px-8 py-3 rounded-xl border-2 border-red-500 text-red-400 
+                           hover:bg-red-500/20 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          )}
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="nombre"
-            placeholder="Nombre"
-            value={userInfo.nombre}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded text-black"
-            required
-          />
-          <input
-            type="text"
-            name="apellido"
-            placeholder="Apellido"
-            value={userInfo.apellido}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded text-black"
-            required
-          />
-               <input
-            type="text"
-            name="codigo"
-            placeholder="Codigo"
-            value={userInfo.codigo}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded text-black"
-            required
-          />
-          <input
-            type="email"
-            name="correo"
-            placeholder="Correo"
-            value={userInfo.correo}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded text-black"
-            required
-          />
-          <input
-            type="tel"
-            name="telefono"
-            placeholder="Teléfono"
-            value={userInfo.telefono}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded text-black"
-            required
-          />
-          <select
-            name="distribuidor"
-            value={userInfo.distribuidor}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded text-black"
-            required
-          >
-            <option value="">Selecciona un distribuidor</option>
-            {distribuidores.map((distribuidor) => (
-              <option key={distribuidor} value={distribuidor}>
-                {distribuidor}
-              </option>
-            ))}
-          </select>
-          <div className="flex space-x-4 justify-center">
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 shadow-md transition">
-              Guardar
-            </button>
-            <button onClick={closeForm} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 shadow-md transition">
-              Cancelar
-            </button>
-          </div>
-        </form>
-      )}
+      </div>
     </div>
   );
 };

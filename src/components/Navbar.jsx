@@ -50,8 +50,7 @@ const Navbar = () => {
   const NavLink = ({ href, icon: Icon, label }) => (
     <a
       href={href}
-      className="group flex items-center space-x-2 text-blue-200 hover:text-white transition-all duration-300 
-        hover:bg-blue-900/30 px-4 py-2 rounded-lg"
+      className="nav-link"
     >
       <Icon className="w-5 h-5 text-blue-400 group-hover:text-blue-200" />
       <span className="font-medium">{label}</span>
@@ -103,26 +102,26 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 
-      bg-gradient-to-br from-blue-900 via-black to-blue-900 
-      shadow-2xl border-b border-blue-800/20">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 
+      shadow-2xl border-b border-white/10 backdrop-blur-xl">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo Area */}
         <div className="flex items-center space-x-3">
-          <a href={getLogoLink()} className="flex items-center">
-            <div className="w-10 h-10 bg-blue-500 rounded-full 
+          <a href={getLogoLink()} className="flex items-center group">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full 
               flex items-center justify-center 
-              ring-4 ring-blue-900/50">
-              <img src={logo} alt="logo" />
+              ring-4 ring-blue-900/50 group-hover:ring-blue-500/50 transition-all duration-300">
+              <img src={logo} alt="logo" className="w-6 h-6" />
             </div>
           </a>
-          <span className="text-blue-200 font-semibold text-xl 
+          <span className="gradient-text font-semibold text-xl 
             tracking-wider">Royal Prestige Cali</span>
         </div>
 
         {/* Mobile Menu Toggle */}
         <button
           onClick={toggleMenu}
-          className="md:hidden text-blue-200 hover:text-white"
+          className="md:hidden text-blue-200 hover:text-white transition-colors"
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -132,22 +131,22 @@ const Navbar = () => {
           className={`fixed md:static top-16 left-0 right-0 
             md:flex md:items-center md:space-x-4 
             ${isMenuOpen ? 'block' : 'hidden'} 
-            md:block bg-blue-900/80 md:bg-transparent 
+            md:block bg-slate-900/95 md:bg-transparent 
             backdrop-blur-xl md:backdrop-blur-0 
-            rounded-xl md:rounded-none p-4 md:p-0`}
+            rounded-xl md:rounded-none p-4 md:p-0 border border-white/10 md:border-0`}
         >
           {!session ? (
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
               <NavLink href="/" icon={Home} label="Home" />
               <NavLink href="/about" icon={Layers} label="About" />
               <NavLink href="/contact" icon={Calculator} label="Contact" />
-              <NavLink href="/login" icon={UserPlus} label="Inciar Sesion" />
+              <NavLink href="/login" icon={UserPlus} label="Iniciar Sesión" />
             </div>
           ) : (
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
-              <NavLink href="/catalogo" icon={Layers} label="Catalogo" />
+              <NavLink href="/catalogo" icon={Layers} label="Catálogo" />
               <NavLink href="/calculadora" icon={Calculator} label="Calculadora" />
-              <NavLink href="/ProfileConfiguration" icon={Settings} label="Configuracion" />
+              <NavLink href="/ProfileConfiguration" icon={Settings} label="Configuración" />
               {sessionAsesor ? (
                 <>
                   <NavLink href="/panel-asesor" icon={UserPlus} label="Panel Asesor" />
@@ -171,7 +170,7 @@ const Navbar = () => {
                   hover:bg-red-900/30 px-4 py-2 rounded-lg transition-all duration-300"
               >
                 <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-200" />
-                <span className="font-medium">Logout</span>
+                <span className="font-medium">Cerrar Sesión</span>
               </button>
             </div>
           )}

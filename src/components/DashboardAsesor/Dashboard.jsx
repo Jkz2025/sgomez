@@ -2,7 +2,25 @@ import { useFetchVisitasHook } from "../Functions/useFetchVisitasHook";
 import { useState, useEffect } from "react";
 import { supabase } from "../Functions/CreateClient";
 import Swal from "sweetalert2";
-import { BarChart, ClipboardCheck, RefreshCcw } from "lucide-react";
+import { 
+  BarChart, 
+  ClipboardCheck, 
+  RefreshCcw, 
+  Calendar,
+  Plus,
+  MapPin,
+  Brain,
+  StickyNote,
+  Users,
+  FileText
+} from "lucide-react";
+import AgendarCita from "./AgendarCita";
+import AgregarPrograma from "./AgregarPrograma";
+import VerProgramas from "./VerProgramas";
+import GoogleMaps from "./GoogleMaps";
+import AsistenteIA from "./AsistenteIA";
+import Notas from "./Notas";
+import AgregarCliente from "./AgregarCliente";
 
 
 const DashboardAsesor = () => {
@@ -11,6 +29,8 @@ const DashboardAsesor = () => {
     pendientes: 0,
     reprogramadas: 0,
   });
+
+  const [activeModal, setActiveModal] = useState(null);
 
   const {
     visitas,
@@ -220,113 +240,229 @@ const DashboardAsesor = () => {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-8 mt-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center">Dashboard Asesor</h1>
-        <p className="text-center text-gray-400">Gestión de visitas en tiempo real</p>
-      </header>
+    <div className="min-h-screen pt-20 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="section-title text-center">Dashboard Asesor</h1>
+          <p className="text-center text-blue-200">Gestión de visitas y programas en tiempo real</p>
+        </header>
 
-     
+        {/* Quick Actions */}
+        <div className="card-grid mb-8">
+          <button 
+            onClick={() => setActiveModal('agendarCita')}
+            className="stat-card flex flex-col items-center justify-center space-y-2"
+          >
+            <Calendar className="w-8 h-8 text-blue-400" />
+            <span className="text-white font-medium">Agendar Cita</span>
+          </button>
+          <button 
+            onClick={() => setActiveModal('agregarPrograma')}
+            className="stat-card flex flex-col items-center justify-center space-y-2"
+          >
+            <FileText className="w-8 h-8 text-green-400" />
+            <span className="text-white font-medium">Agregar Programa</span>
+          </button>
+          <button 
+            onClick={() => setActiveModal('verProgramas')}
+            className="stat-card flex flex-col items-center justify-center space-y-2"
+          >
+            <FileText className="w-8 h-8 text-emerald-400" />
+            <span className="text-white font-medium">Ver Programas</span>
+          </button>
+          <button 
+            onClick={() => setActiveModal('googleMaps')}
+            className="stat-card flex flex-col items-center justify-center space-y-2"
+          >
+            <MapPin className="w-8 h-8 text-red-400" />
+            <span className="text-white font-medium">Google Maps</span>
+          </button>
+          <button 
+            onClick={() => setActiveModal('asistenteIA')}
+            className="stat-card flex flex-col items-center justify-center space-y-2"
+          >
+            <Brain className="w-8 h-8 text-purple-400" />
+            <span className="text-white font-medium">Asistente IA</span>
+          </button>
+          <button 
+            onClick={() => setActiveModal('notas')}
+            className="stat-card flex flex-col items-center justify-center space-y-2"
+          >
+            <StickyNote className="w-8 h-8 text-yellow-400" />
+            <span className="text-white font-medium">Notas</span>
+          </button>
+          <button 
+            onClick={() => setActiveModal('agregarCliente')}
+            className="stat-card flex flex-col items-center justify-center space-y-2"
+          >
+            <Users className="w-8 h-8 text-cyan-400" />
+            <span className="text-white font-medium">Agregar Cliente</span>
+          </button>
+        </div>
 
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-green-800 to-green-600 p-6 rounded-lg shadow-md flex items-center">
-          <ClipboardCheck className="w-10 h-10 text-green-200 mr-4" />
-          <div>
-            <h3 className="text-xl font-semibold">Realizadas</h3>
-            <p className="text-3xl font-bold">{statsHoy.realizadas}</p>
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-yellow-800 to-yellow-600 p-6 rounded-lg shadow-md flex items-center">
-          <BarChart className="w-10 h-10 text-yellow-200 mr-4" />
-          <div>
-            <h3 className="text-xl font-semibold">Pendientes</h3>
-            <p className="text-3xl font-bold">{statsHoy.pendientes}</p>
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-red-800 to-red-600 p-6 rounded-lg shadow-md flex items-center">
-          <RefreshCcw className="w-10 h-10 text-red-200 mr-4" />
-          <div>
-            <h3 className="text-xl font-semibold">Reprogramadas</h3>
-            <p className="text-3xl font-bold">{statsHoy.reprogramadas}</p>
-          </div>
-        </div>
-      </div>
-
- {/* Filtros por rango de fecha */}
- <div className="flex justify-center space-x-4 mb-8">
-        <div>
-          <label htmlFor="startDate" className="block text-gray-400">
-            Fecha inicial:
-          </label>
-          <input
-            type="date"
-            id="startDate"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="border p-2 rounded bg-gray-800 text-white"
-          />
-        </div>
-        <div>
-          <label htmlFor="endDate" className="block text-gray-400">
-            Fecha final:
-          </label>
-          <input
-            type="date"
-            id="endDate"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="border p-2 rounded bg-gray-800 text-white"
-          />
-        </div>
-      </div>
-      {/* Visitas */}
-      <div className="bg-gray-800 rounded-lg shadow-lg p-6 max-w-6xl mx-auto">
-        
-        <h2 className="text-2xl font-semibold mb-4 text-center text-white">
-          Visitas Pendientes
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {visitas.length > 0 ? (
-            visitas.map((visita) => (
-              <div
-                key={visita.id}
-                className={`p-4 rounded-lg shadow-lg ${
-                  visita.estado === "pendiente"
-                    ? "bg-blue-900/30"
-                    : visita.estado === "realizada"
-                    ? "bg-green-900/30"
-                    : "bg-yellow-900/30"
-                }`}
-              >
-                <h3 className="font-bold text-lg text-white">{visita.cliente}</h3>
-                <p><span className="font-medium text-gray-400">Direccion:</span> {visita.ciudad}, {visita.barrio}, {visita.direccion}</p>
-                <p><span className="font-medium text-gray-400">Telefono:</span> {visita.telefono}</p>
-                <p><span className="font-medium text-gray-400">Fecha:</span> {visita.fecha}</p>
-                <p><span className="font-medium text-gray-400">Hora:</span> {visita.hora}</p>
-                <p><span className="font-medium text-gray-400">Detalle:</span> {visita.detalles}</p>
-                <button
-              onClick={() => handleRealizar(visita, "complete")}
-              className="text-green-500 text-sm md:text-base"
-            >
-              Marcar Realizada
-            </button>
-            <button
-              onClick={() => handleReprogramar(visita, "reprogramar")}
-              className="text-yellow-500 text-sm md:text-base ml-2"
-            >
-              Reprogramar
-            </button>
+        {/* Estadísticas */}
+        <div className="card-grid mb-8">
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-600/20 rounded-xl">
+                <ClipboardCheck className="w-6 h-6 text-green-400" />
               </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-center col-span-full">
-              No hay visitas en este rango.
-            </p>
-          )}
+              <span className="text-green-400 text-sm font-semibold">Realizadas</span>
+            </div>
+            <h3 className="text-3xl font-bold text-white">{statsHoy.realizadas}</h3>
+            <p className="text-blue-200 text-sm">Visitas completadas</p>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-yellow-600/20 rounded-xl">
+                <BarChart className="w-6 h-6 text-yellow-400" />
+              </div>
+              <span className="text-yellow-400 text-sm font-semibold">Pendientes</span>
+            </div>
+            <h3 className="text-3xl font-bold text-white">{statsHoy.pendientes}</h3>
+            <p className="text-blue-200 text-sm">Visitas pendientes</p>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-600/20 rounded-xl">
+                <RefreshCcw className="w-6 h-6 text-red-400" />
+              </div>
+              <span className="text-red-400 text-sm font-semibold">Reprogramadas</span>
+            </div>
+            <h3 className="text-3xl font-bold text-white">{statsHoy.reprogramadas}</h3>
+            <p className="text-blue-200 text-sm">Visitas reprogramadas</p>
+          </div>
+        </div>
+
+        {/* Filtros por rango de fecha */}
+        <div className="glass-card p-6 mb-8">
+          <h3 className="text-xl font-semibold text-white mb-4">Filtrar por rango de fechas</h3>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <label htmlFor="startDate" className="block text-blue-200 mb-2">
+                Fecha inicial:
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="input-field"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="endDate" className="block text-blue-200 mb-2">
+                Fecha final:
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="input-field"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Visitas */}
+        <div className="glass-card p-6">
+          <h2 className="text-2xl font-semibold text-white mb-6 text-center">
+            Visitas Pendientes
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visitas.length > 0 ? (
+              visitas.map((visita) => (
+                <div
+                  key={visita.id}
+                  className={`p-6 rounded-xl ${
+                    visita.estado === "pendiente"
+                      ? "bg-blue-900/30"
+                      : visita.estado === "realizada"
+                      ? "bg-green-900/30"
+                      : "bg-yellow-900/30"
+                  } hover:bg-white/5 transition-all duration-300`}
+                >
+                  <h3 className="font-bold text-lg text-white mb-3">{visita.cliente}</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium text-blue-200">Dirección:</span> {visita.ciudad}, {visita.barrio}, {visita.direccion}</p>
+                    <p><span className="font-medium text-blue-200">Teléfono:</span> {visita.telefono}</p>
+                    <p><span className="font-medium text-blue-200">Fecha:</span> {visita.fecha}</p>
+                    <p><span className="font-medium text-blue-200">Hora:</span> {visita.hora}</p>
+                    <p><span className="font-medium text-blue-200">Detalle:</span> {visita.detalles}</p>
+                  </div>
+                  <div className="flex space-x-2 mt-4">
+                    <button
+                      onClick={() => handleRealizar(visita, "complete")}
+                      className="flex-1 gradient-button py-2 rounded-lg text-sm"
+                    >
+                      Marcar Realizada
+                    </button>
+                    <button
+                      onClick={() => handleReprogramar(visita, "reprogramar")}
+                      className="flex-1 px-4 py-2 rounded-lg text-sm border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20 transition-all duration-300"
+                    >
+                      Reprogramar
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-blue-200 text-center col-span-full py-8">
+                No hay visitas en este rango.
+              </p>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {activeModal === 'agendarCita' && (
+        <AgendarCita 
+          onClose={() => setActiveModal(null)} 
+          onCitaAgendada={fetchVisitas}
+        />
+      )}
+      {activeModal === 'agregarPrograma' && (
+        <AgregarPrograma 
+          onClose={() => setActiveModal(null)} 
+          onProgramaAgregado={() => {
+            setActiveModal(null);
+            // Optionally refresh data
+          }}
+        />
+      )}
+      {activeModal === 'verProgramas' && (
+        <VerProgramas 
+          onClose={() => setActiveModal(null)} 
+        />
+      )}
+      {activeModal === 'googleMaps' && (
+        <GoogleMaps 
+          onClose={() => setActiveModal(null)} 
+        />
+      )}
+      {activeModal === 'asistenteIA' && (
+        <AsistenteIA 
+          onClose={() => setActiveModal(null)} 
+        />
+      )}
+      {activeModal === 'notas' && (
+        <Notas 
+          onClose={() => setActiveModal(null)} 
+        />
+      )}
+      {activeModal === 'agregarCliente' && (
+        <AgregarCliente 
+          onClose={() => setActiveModal(null)} 
+          onClienteAgregado={() => {
+            setActiveModal(null);
+            // Optionally refresh data
+          }}
+        />
+      )}
     </div>
   );
 };

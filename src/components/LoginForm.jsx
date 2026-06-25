@@ -14,11 +14,11 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-black to-blue-900 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md glass-card overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold text-white mb-2">Bienvenido</h2>
+            <h2 className="section-title">Bienvenido</h2>
             <p className="text-blue-200">Inicia sesión en tu cuenta</p>
           </div>
 
@@ -32,9 +32,7 @@ const LoginForm = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Usuario"
-                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg 
-                  text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 
-                  transition duration-300"
+                className="input-field pl-10"
                 required
               />
             </div>
@@ -48,9 +46,7 @@ const LoginForm = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Contraseña"
-                className="w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-lg 
-                  text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 
-                  transition duration-300"
+                className="input-field pl-10 pr-12"
                 required
               />
               <button
@@ -64,10 +60,7 @@ const LoginForm = () => {
 
             <button
               type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg 
-                text-white font-semibold transition duration-300 
-                transform hover:scale-105 active:scale-95 
-                focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="gradient-button w-full py-3 rounded-xl"
             >
               Iniciar Sesión
             </button>

@@ -18,6 +18,7 @@ import Calculadora from "./components/Calculadora/Calculadora";
 import DashboardPrincipal from "./components/DashboardPrincipal";
 import ProfileConfiguration from "./components/Configuracion/ProfileConfiguration";
 import PanelAsesor from "./components/PanelAsesor";
+import AuthCallback from "./components/AuthCallback";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <div className="bg-zinc-800 rounded-2xl shadow-2xl border border-zinc-700 overflow-hidden">
               <Routes>
                 <Route path="/login" element={<LoginForm />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<DashboardPrincipal />} />
                 <Route path="/catalogo" element={<Inventario />} />
