@@ -18,47 +18,51 @@ const VerProgramas = ({ onClose }) => {
     fetchProgramas();
   }, [selectedMonth, selectedYear]);
 
-  const fetchProgramas = async (e) => {
-    try {
-      const startStr = startDate.toISOString().split('T')[0]; ''
-      const endStr  = endDate.toISOString().split('T')[0];
-      setLoading(true);
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
+const fetchProgramas = async () => {  // ← quitar el parámetro 'e' que no se usa
+  try {
+    setLoading(true);
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
 
-      const userId = user?.id;
-      if (!userId) throw new Error('No se encontró ID de usuario');
+    const userId = user?.id;
+    if (!userId) throw new Error('No se encontró ID de usuario');
 
-      const startDate = new Date(selectedYear, selectedMonth, 1);
-      const endDate = new Date(selectedYear, selectedMonth + 1, 0);
+    // ✅ Declarar ANTES de usar
+    const startDate = new Date(selectedYear, selectedMonth, 1);
+    const endDate = new Date(selectedYear, selectedMonth + 1, 0);
 
-      const { data, error } = await supabase
-        .from('programas')
-        .select(`
-          *,
-          referidos_programa (
-            id,
-            nombre,
-            telefono,
-            estado_civil,
-            trabajo,
-            barrio_ciudad,
-            razon_recomendacion
-          )
-        `)
-        .eq('asesor', userId)
-        .gte('fecha_inicial', startStr)
-        .lte('fecha_inicial',endStr)
-        .order('fecha_inicial', { ascending: false });
+    const startStr = startDate.toISOString().split('T')[0];
+    const endStr = endDate.toISOString().split('T')[0];
 
-      if (error) throw error;
-      setProgramas(data || []);
-    } catch (error) {
-      console.error('Error al cargar programas:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const { data, error } = await supabase
+  .from('programas')
+  .select(`
+  *,
+  referidos:referidos_programa!referidos_programa_programaid_fkey (
+    id,
+    nombre,
+    telefono,
+    estado_civil,
+    trabajo,
+    barrio_ciudad,
+    razon_recomendacion
+  )
+`)
+  .eq('asesor', userId)
+  // .gte('fecha_inicial', startStr)
+  // .lte('fecha_inicial', endStr)
+  .order('fecha_inicial', { ascending: false });
+
+    if (error) throw error;
+    console.log('DATA:', data);  
+    console.log('ERROR:', error);
+    setProgramas(data || []);
+  } catch (error) {
+    console.error('Error al cargar programas:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const toggleExpand = (programaId) => {
     setExpandedProgram(expandedProgram === programaId ? null : programaId);
@@ -160,7 +164,7 @@ const VerProgramas = ({ onClose }) => {
                             Distribución: {programa.distribucion}
                           </span>
                           <span className="text-green-400 font-medium">
-                            {programa.referidos_programa?.length || 0} referidos
+                            {programa.referidos?.length || 0} referidos
                           </span>
                         </div>
                       </div>
@@ -177,9 +181,9 @@ const VerProgramas = ({ onClose }) => {
                   {expandedProgram === programa.id && (
                     <div className="border-t border-white/10 p-4">
                       <h4 className="text-lg font-semibold text-white mb-4">Referidos</h4>
-                      {programa.referidos_programa && programa.referidos_programa.length > 0 ? (
+                      {programa.referidos && programa.referidos.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {programa.referidos_programa.map((referido) => (
+                          {programa.referidos.map((referido) => (
                             <div key={referido.id} className="bg-white/5 p-4 rounded-lg">
                               <div className="flex items-center space-x-2 mb-2">
                                 <User className="w-4 h-4 text-green-400" />

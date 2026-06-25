@@ -103,7 +103,6 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
 
       // Insertar referidos
       const referidosConPrograma = referidos.map(referido => ({
-        programa: insertedPrograma.id,
         programaid: insertedPrograma.id,
         nombre: referido.nombre_completo,
         apellido: '',
