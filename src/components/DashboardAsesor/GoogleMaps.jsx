@@ -6,12 +6,12 @@ const GoogleMaps = ({ onClose }) => {
   const [mapUrl, setMapUrl] = useState('https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.9384368745!2d-74.072092!3d4.710989!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM4wNycwMC42NSJOIDTCsDAyJzU1LjUiVw!5e0!3m2!1ses!2sco!4v1620000000000!5m2!1ses!2sco');
 
 
-const apiKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+const api = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       const encodedQuery = encodeURIComponent(searchQuery);
-      setMapUrl(`https://www.google.com/maps/embed/v1/search?key=${apiKey}&q=${encodedQuery}`);
+      setMapUrl(`https://www.google.com/maps/embed/v1/search?key=${api}&q=${encodedQuery}`);
     }
   };
 
@@ -20,7 +20,7 @@ const apiKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setMapUrl(`https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${latitude},${longitude}&zoom=15`);
+          setMapUrl(`https://www.google.com/maps/embed/v1/view?key=${api}&center=${latitude},${longitude}&zoom=15`);
         },
         (error) => {
           console.error('Error getting location:', error);
