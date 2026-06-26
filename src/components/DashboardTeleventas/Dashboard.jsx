@@ -45,7 +45,7 @@ const DashboardTeleventas = () => {
     try {
       const { data: userData, error: userError } = await supabase
         .from("profiles")
-        .select("distribuidor")
+        .select("distribucion")
         .eq("id", session.user.id)
         .single();
 
@@ -54,7 +54,7 @@ const DashboardTeleventas = () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("distribuidor", userData.distribuidor)
+        .eq("distribucion", userData.distribucion)
         .eq("cargo", "asesor");
 
       if (error) throw error;
@@ -123,7 +123,7 @@ const DashboardTeleventas = () => {
          // Fetch the distributor for the current user
     const { data: userData, error: userError } = await supabase
     .from("profiles")
-    .select("distribuidor")
+    .select("distribucion")
     .eq("id", session.user.id)
     .single();
 
@@ -149,7 +149,7 @@ const DashboardTeleventas = () => {
         televentas_id: session.user.id,
         asesor_name: formData.asesor_name,
         estado: "pendiente",
-        distribuidor: userData.distribuidor, // Insertar el distribuidor aquí
+        distribucion: userData.distribucion, // Insertar el distribucion aquí
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
@@ -555,7 +555,7 @@ export default DashboardTeleventas;
 //     try {
 //       const { data: userData, error: userError } = await supabase
 //         .from("profiles")
-//         .select("distribuidor")
+//         .select("distribucion")
 //         .eq("id", session.user.id)
 //         .single();
 
@@ -564,7 +564,7 @@ export default DashboardTeleventas;
 //       const { data, error } = await supabase
 //         .from("profiles")
 //         .select("*")
-//         .eq("distribuidor", userData.distribuidor)
+//         .eq("distribucion", userData.distribucion)
 //         .eq("cargo", "asesor");
 
 //       if (error) throw error;

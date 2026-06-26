@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { supabase } from '../Functions/CreateClient';
 import Swal from 'sweetalert2';
 import { X, User, Phone, MapPin, Mail, Building2, Calendar } from 'lucide-react';
+import { useUserDistribucion } from '../Functions/useUserDistribucion';
 
 const AgregarCliente = ({ onClose, onClienteAgregado }) => {
+  const { distribucion } = useUserDistribucion()
   const [formData, setFormData] = useState({
     nombre_completo: '',
     telefono: '',
@@ -13,7 +15,8 @@ const AgregarCliente = ({ onClose, onClienteAgregado }) => {
     correo: '',
     trabajo: '',
     fecha_nacimiento: '',
-    notas: ''
+    notas: '',
+    distribucion: distribucion
   });
 
   const handleChange = (e) => {

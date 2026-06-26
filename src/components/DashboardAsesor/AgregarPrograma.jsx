@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { supabase } from '../Functions/CreateClient';
 import Swal from 'sweetalert2';
 import { X, Plus, Trash2, User, Phone, MapPin, Calendar, Gift, Building2 } from 'lucide-react';
+import { useUserDistribucion } from '../Functions/useUserDistribucion';
 
 const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
+  const { distribucion, loading} = useUserDistribucion()
+  
   const [programaData, setProgramaData] = useState({
     cliente_nombre: '',
     cliente_telefono: '',
     cliente_direccion: '',
     fecha: '',
     regalo: '',
-    distribucion: ''
+    distribucion: distribucion
   });
 
   const [referidos, setReferidos] = useState([]);

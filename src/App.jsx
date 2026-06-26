@@ -39,7 +39,7 @@ function App() {
                 <Route path="/ProfileConfiguration" element={<ProfileConfiguration />} />
                 <Route path="/calculadora" element={<Calculadora />} />
                 <Route path="/dashboard-asesor" element={<DashboardAsesor />} />
-                <Route path="/dashboard-distribuidor" element={<DashboardDistribuidor />} />
+                <Route path="/dashboard-distribucion" element={<DashboardDistribuidor />} />
                 <Route path="/dashboard-televentas" element={<DashboardTeleventas />} />
                 <Route path='/panel-asesor' element={<PanelAsesor />} />
               </Routes>

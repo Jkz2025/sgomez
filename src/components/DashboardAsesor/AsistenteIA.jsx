@@ -3,12 +3,14 @@ import { X, Brain, Send, Loader2, Calendar, Clock, User } from 'lucide-react';
 import { sendMessageToAI } from '../Functions/openaiService';
 
 const AsistenteIA = ({ onClose }) => {
+
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
       content: '¡Hola! Soy tu asistente de IA. Puedo ayudarte a agendar citas, gestionar programas y responder preguntas. ¿En qué puedo ayudarte hoy?'
     }
   ]);
+  
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +25,6 @@ const AsistenteIA = ({ onClose }) => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
     const userMessage = { role: 'user', content: input };
     setMessages([...messages, userMessage]);
     setInput('');
