@@ -16,7 +16,7 @@ export const NuevaVentaForm = ({
   const [totalVenta, setTotalVenta] = useState(0); // Nuevo campo para el total de la venta
   const { session } = useAuth();
   const [asesorNombre, setAsesorNombre] = useState("");
-  const [distribuidor, setDistribuidor] = useState("");
+  const [distribucion, setDistribuidor] = useState("");
 
   useFetchInventario(setInventario);
 
@@ -40,14 +40,14 @@ export const NuevaVentaForm = ({
     if (session) {
       const { data, error } = await supabase
         .from("profiles")
-        .select("distribuidor")
+        .select("distribucion")
         .eq("id", session.user.id)
         .single();
 
       if (error) {
         console.error("Error obteniendo la distribucion del asesor:", error);
       } else {
-        setDistribuidor(data.distribuidor);
+        setDistribuidor(data.distribucion);
       }
     }
   };
@@ -106,7 +106,7 @@ export const NuevaVentaForm = ({
       productos: productosSeleccionados,
       total: totalVenta, // Total de la venta
       asesor: asesorNombre,
-      distribuidor: distribuidor,
+      distribucion: distribucion,
     };
 
     // Guardar la venta

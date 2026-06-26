@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { supabase } from '../Functions/CreateClient';
 import Swal from 'sweetalert2';
 import { X, Calendar, Clock, MapPin, Phone, User } from 'lucide-react';
+import { useUserDistribucion } from '../Functions/useUserDistribucion';
 
 const AgendarCita = ({ onClose, onCitaAgendada }) => {
+ const { distribucion, loading} = useUserDistribucion()
+
   const [formData, setFormData] = useState({
     cliente_nombre: '',
     cliente_telefono: '',
@@ -12,7 +15,8 @@ const AgendarCita = ({ onClose, onCitaAgendada }) => {
     barrio: '',
     fecha: '',
     hora: '',
-    notas: ''
+    notas: '',
+    distribucion: distribucion 
   });
 
   const handleChange = (e) => {

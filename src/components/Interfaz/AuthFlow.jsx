@@ -14,7 +14,7 @@ const AuthFlow = () => {
     codigo: "",
     correo: "",
     telefono: "",
-    distribuidor: "",
+    distribucion: "",
   });
   const [userData, setUserData] = useState(null);
 
@@ -59,8 +59,8 @@ console.log(session,"session")
       case "televentas":
         navigate("/dashboard-televentas");
         break;
-      case "distribuidor":
-        navigate("/dashboard-distribuidor");
+      case "distribucion":
+        navigate("/dashboard-distribucion");
         break;
       default:
         navigate("/");
@@ -163,7 +163,7 @@ console.log(session,"session")
     return null;
   }
 
-  const distribuidores = [
+  const distribuciones = [
     "SGOMEZ SALUTEM",
     "JM SALUTEM",
     "RYD SALUTEM",
@@ -200,7 +200,7 @@ console.log(session,"session")
                   <span>Televentas</span>
                 </button>
                 <button
-                  onClick={() => handleCargoSelection("distribuidor")}
+                  onClick={() => handleCargoSelection("distribucion")}
                   className="gradient-button px-6 py-3 rounded-xl flex items-center justify-center space-x-2"
                 >
                   <span>Distribuidor</span>
@@ -255,16 +255,16 @@ console.log(session,"session")
                 required
               />
               <select
-                name="distribuidor"
-                value={userInfo.distribuidor}
+                name="distribucion"
+                value={userInfo.distribucion}
                 onChange={handleInputChange}
                 className="input-field"
                 required
               >
-                <option value="">Selecciona un distribuidor</option>
-                {distribuidores.map((distribuidor) => (
-                  <option key={distribuidor} value={distribuidor}>
-                    {distribuidor}
+                <option value="">Selecciona un distribucion</option>
+                {distribuciones.map((distribucion) => (
+                  <option key={distribucion} value={distribucion}>
+                    {distribucion}
                   </option>
                 ))}
               </select>

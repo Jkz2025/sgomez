@@ -1,271 +1,260 @@
+// DashboardDistribuidor.jsx
 import { useState, useEffect } from "react";
 import { supabase } from "../Functions/CreateClient";
 import { useAuth } from "../../constants/AuthContext";
-import { Users, TrendingUp, Calendar } from "lucide-react";
+import {
+  Users, Calendar, FileText, StickyNote, UserPlus, BarChart3,
+  ClipboardCheck, Clock, RefreshCw, Eye, PlusCircle
+} from "lucide-react";
+import Swal from "sweetalert2";
 
+
+// Subcomponentes para cada tabla (puedes moverlos a archivos separados)
+const TabProgramas = ({ data, loading }) => {
+  if (loading) return <div className="text-blue-200">Cargando programas...</div>;
+  if (data.length === 0) return <div className="text-blue-200">No hay programas registrados.</div>;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.map((prog) => (
+        <div key={prog.id} className="glass-card p-4">
+          <h4 className="font-bold text-white">{prog.cliente_nombre}</h4>
+          <p className="text-sm text-blue-200">Asesor: {prog.asesor}</p>
+          <p className="text-sm text-blue-200">Fecha: {prog.fecha_inicial} → {prog.fecha_final}</p>
+          <p className="text-sm text-blue-200">Regalo: {prog.regalo || 'Ninguno'}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TabReferidos = ({ data, loading }) => {
+  if (loading) return <div className="text-blue-200">Cargando referidos...</div>;
+  if (data.length === 0) return <div className="text-blue-200">No hay referidos registrados.</div>;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.map((ref) => (
+        <div key={ref.id} className="glass-card p-4">
+          <h4 className="font-bold text-white">{ref.nombre} {ref.apellido}</h4>
+          <p className="text-sm text-blue-200">Teléfono: {ref.telefono}</p>
+          <p className="text-sm text-blue-200">Correo: {ref.correo}</p>
+          <p className="text-sm text-blue-200">Estado: {ref.estado}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TabVisitas = ({ data, loading }) => {
+  if (loading) return <div className="text-blue-200">Cargando visitas...</div>;
+  if (data.length === 0) return <div className="text-blue-200">No hay visitas registradas.</div>;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.map((visita) => (
+        <div key={visita.id} className="glass-card p-4">
+          <h4 className="font-bold text-white">{visita.cliente_nombre}</h4>
+          <p className="text-sm text-blue-200">Asesor: {visita.asesor}</p>
+          <p className="text-sm text-blue-200">Fecha: {visita.fecha} {visita.hora}</p>
+          <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold ${
+            visita.estado === 'realizada' ? 'bg-green-600 text-white' :
+            visita.estado === 'pendiente' ? 'bg-yellow-600 text-white' :
+            'bg-red-600 text-white'
+          }`}>
+            {visita.estado}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TabClientes = ({ data, loading }) => {
+  if (loading) return <div className="text-blue-200">Cargando clientes...</div>;
+  if (data.length === 0) return <div className="text-blue-200">No hay clientes registrados.</div>;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.map((cliente) => (
+        <div key={cliente.id} className="glass-card p-4">
+          <h4 className="font-bold text-white">{cliente.nombre_completo}</h4>
+          <p className="text-sm text-blue-200">Teléfono: {cliente.telefono}</p>
+          <p className="text-sm text-blue-200">Dirección: {cliente.direccion}</p>
+          <p className="text-sm text-blue-200">Ciudad: {cliente.ciudad}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TabNotas = ({ data, loading }) => {
+  if (loading) return <div className="text-blue-200">Cargando notas...</div>;
+  if (data.length === 0) return <div className="text-blue-200">No hay notas registradas.</div>;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.map((nota) => (
+        <div key={nota.id} className="glass-card p-4">
+          <h4 className="font-bold text-white">{nota.titulo}</h4>
+          <p className="text-sm text-blue-200">{nota.contenido}</p>
+          <p className="text-sm text-blue-200">Categoría: {nota.categoria}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TabPerfiles = ({ data, loading }) => {
+  if (loading) return <div className="text-blue-200">Cargando perfiles...</div>;
+  if (data.length === 0) return <div className="text-blue-200">No hay asesores/televentas asociados.</div>;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.map((perfil) => (
+        <div key={perfil.id} className="glass-card p-4">
+          <h4 className="font-bold text-white">{perfil.nombre} {perfil.apellido}</h4>
+          <p className="text-sm text-blue-200">Cargo: {perfil.cargo}</p>
+          <p className="text-sm text-blue-200">Código: {perfil.codigo}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Componente principal
 const DashboardDistribuidor = () => {
-  const [televentas, setTeleventas] = useState([]);
-  const [asesores, setAsesores] = useState([]);
-  const [ventas, setVentas] = useState([]);
-  const [visitas, setVisitas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  // Set default date range to current month
-  const today = new Date();
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  
-  const [dateRange, setDateRange] = useState({
-    startDate: firstDayOfMonth.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0],
+  const { session } = useAuth();
+  const [activeTab, setActiveTab] = useState('programas');
+  const [distribucion, setDistribucion] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    programas: [],
+    referidos: [],
+    visitas: [],
+    clientes: [],
+    notas: [],
+    perfiles: []
   });
 
-  const { session } = useAuth();
-
-  // Helper function to convert Colombian Pesos to USD
-  const convertPesosToUSD = (pesoAmount) => {
-    const numericAmount = Number(pesoAmount);
-    const exchangeRate = 4000; // Example rate
-    return isNaN(numericAmount) ? 0 : numericAmount / exchangeRate;
-  };
-
+  // Obtener la distribucion del distribuidor logueado
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDistribucion = async () => {
       if (!session?.user?.id) return;
-  
       try {
-        setIsLoading(true);
-  
-        // Obtenemos primero el distribuidor
-        const { data: distribuidorData, error: distribuidorError } =
-          await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .single();
-  
-        if (distribuidorError) throw distribuidorError;
-  
-        // Fetch all data in Promise.all
-        const startDate = new Date(dateRange.startDate);
-        const endDate = new Date(dateRange.endDate);
-
-        const [ventasResponse, profilesResponse, visitasResponse] = await Promise.all([
-          supabase
-            .from("visitas")
-            .select("*")
-            .eq("distribuidor", distribuidorData.distribuidor)
-            .gte("fecha", startDate.toISOString())
-            .lte("fecha", endDate.toISOString()),
-          supabase
-            .from("profiles")
-            .select("*")
-            .eq("distribuidor", distribuidorData.distribuidor)
-            .in("cargo", ["televentas", "asesor"]),
-          supabase
-            .from("visitas")
-            .select("*")
-            .eq("distribuidor", distribuidorData.distribuidor)
-            .gte("fecha", startDate.toISOString())
-            .lte("fecha", endDate.toISOString())
-        ]);
-  
-        // Check for errors in each response
-        if (ventasResponse.error) throw ventasResponse.error;
-        if (profilesResponse.error) throw profilesResponse.error;
-        if (visitasResponse.error) throw visitasResponse.error;
-  
-        const televentasData = profilesResponse.data.filter(
-          (profile) => profile.cargo === "televentas"
-        );
-        const asesoresData = profilesResponse.data.filter(
-          (profile) => profile.cargo === "asesor"
-        );
-  
-        // Log raw data to debug
-        console.log('Ventas Response:', ventasResponse.data);
-        console.log('Visitas Response:', visitasResponse.data);
-  
-        setTeleventas(televentasData);
-        setAsesores(asesoresData);
-        setVentas(ventasResponse.data || []);
-        setVisitas(visitasResponse.data || []);
+        const { data: perfil, error } = await supabase
+          .from('profiles')
+          .select('distribucion')
+          .eq('id', session.user.id)
+          .single();
+        if (error) throw error;
+        setDistribucion(perfil.distribucion);
       } catch (error) {
-        console.error("Fetch error:", error);
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
+        console.error('Error obteniendo distribucion:', error);
+        Swal.fire('Error', 'No se pudo obtener la distribución del usuario.', 'error');
       }
     };
-  
+    fetchDistribucion();
+  }, [session]);
+
+  // Cargar datos según la distribucion y la pestaña activa
+  useEffect(() => {
+    if (!distribucion) return;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        let result;
+        switch (activeTab) {
+          case 'programas':
+            result = await supabase.from('programas').select('*').eq('distribucion', distribucion);
+            break;
+          case 'referidos':
+            result = await supabase.from('referidos_programa').select('*').eq('distribucion', distribucion);
+            break;
+          case 'visitas':
+            result = await supabase.from('visitas').select('*').eq('distribucion', distribucion);
+            break;
+          case 'clientes':
+            result = await supabase.from('clientes').select('*').eq('distribucion', distribucion);
+            break;
+          case 'notas':
+            result = await supabase.from('notas').select('*').eq('distribucion', distribucion);
+            break;
+          case 'perfiles':
+            result = await supabase.from('profiles').select('*').eq('distribucion', distribucion);
+            break;
+          default:
+            return;
+        }
+        if (result.error) throw result.error;
+        setData(prev => ({ ...prev, [activeTab]: result.data || [] }));
+      } catch (error) {
+        console.error(`Error cargando ${activeTab}:`, error);
+        Swal.fire('Error', `No se pudieron cargar los datos de ${activeTab}.`, 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchData();
-  }, [session, dateRange]);
+  }, [distribucion, activeTab]);
 
-  const getVentasColor = (monto) => {
-    if (monto < 3000) return "from-red-800 to-red-600";
-    if (monto < 5000) return "from-yellow-800 to-yellow-600";
-    if (monto < 10000) return "from-green-800 to-green-600";
-    return "from-blue-800 to-blue-600";
+  // Renderizar la pestaña correspondiente
+  const renderTabContent = () => {
+    const props = { data: data[activeTab], loading };
+    switch (activeTab) {
+      case 'programas': return <TabProgramas {...props} />;
+      case 'referidos': return <TabReferidos {...props} />;
+      case 'visitas': return <TabVisitas {...props} />;
+      case 'clientes': return <TabClientes {...props} />;
+      case 'notas': return <TabNotas {...props} />;
+      case 'perfiles': return <TabPerfiles {...props} />;
+      default: return null;
+    }
   };
-
-  const getCitasColor = (asesor) => {
-    const asesorCitas = visitas.filter((visita) => visita.asesor === asesor.id);
-    const pendientes = asesorCitas.filter(
-      (visita) => visita.estado === "pendiente"
-    ).length;
-    const reprogramadas = asesorCitas.filter(
-      (visita) => visita.estado === "reprogramar"
-    ).length;
-    const realizadas = asesorCitas.filter(
-      (visita) => visita.estado === "realizada"
-    ).length;
-
-    if (pendientes > Math.max(reprogramadas, realizadas))
-      return "from-yellow-800 to-yellow-600";
-    if (realizadas > Math.max(pendientes, reprogramadas))
-      return "from-green-800 to-green-600";
-    if (reprogramadas > Math.max(pendientes, realizadas))
-      return "from-red-800 to-red-600";
-    return "from-blue-800 to-blue-600";
-  };
-
-  const getVentasTotal = (asesor) => {
-    return ventas
-      .filter((venta) => venta.asesor === asesor.id)
-      .reduce((sum, venta) => {
-        // Ensure we're adding a number and handle potential null/undefined
-        const ventaValue = venta.valor_venta || 0;
-        return sum + ventaValue;
-      }, 0);
-  };
-
-  const getVisitasTotal = (asesor) => {
-    return visitas.filter((visita) => visita.asesor === asesor.id).length;
-  };
-
-  if (isLoading) return <div>Cargando...</div>;
-
-  if (error)
-    return <div className="text-red-500 text-center p-4">Error: {error}</div>;
-
-  // Total ventas calculations
-  const totalVentasPesos = ventas.reduce((sum, venta) => {
-    // Ensure we're adding a number and handle potential null/undefined
-    const ventaValue = venta.valor_venta || 0;
-    return sum + ventaValue;
-  }, 0);
-  const totalVentasUSD = convertPesosToUSD(totalVentasPesos);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-8 mt-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center">
-          Dashboard Distribuidor
-        </h1>
-        <p className="text-center text-gray-400">Gestión de ventas y citas</p>
-      </header>
+    <div className="min-h-screen pt-20 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="section-title text-center">Dashboard Distribuidor</h1>
+          <p className="text-center text-blue-200">
+            Visión global de tu red de ventas (distribución: <strong>{distribucion}</strong>)
+          </p>
+        </header>
 
-      {/* Rest of the component remains the same */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-800 to-blue-600 p-6 rounded-lg shadow-md flex items-center">
-          <TrendingUp className="w-10 h-10 text-blue-200 mr-4" />
-          <div>
-            <h3 className="text-xl font-semibold">Ventas Totales</h3>
-            <p className="text-3xl font-bold">
-              ${totalVentasPesos.toLocaleString()} COP
-              <br />
-              <span className="text-xl text-blue-200">
-                (${totalVentasUSD.toLocaleString()} USD)
-              </span>
-            </p>
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-green-800 to-green-600 p-6 rounded-lg shadow-md flex items-center">
-          <Calendar className="w-10 h-10 text-green-200 mr-4" />
-          <div>
-            <h3 className="text-xl font-semibold">Citas Realizadas</h3>
-            <p className="text-3xl font-bold">
-              {visitas.filter((visita) => visita.estado === "realizada").length}
-            </p>
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-yellow-800 to-yellow-600 p-6 rounded-lg shadow-md flex items-center">
-          <Users className="w-10 h-10 text-yellow-200 mr-4" />
-          <div>
-            <h3 className="text-xl font-semibold">Citas Pendientes</h3>
-            <p className="text-3xl font-bold">
-              {visitas.filter((visita) => visita.estado === "pendiente").length}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Asesores and Televentas Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-white">Asesores</h2>
-          <div className="space-y-4 max-h-[400px] overflow-y-auto">
-            {asesores.map((asesor) => {
-              const ventasTotal = getVentasTotal(asesor);
-              const ventasUSD = convertPesosToUSD(ventasTotal);
-              const visitasTotal = getVisitasTotal(asesor);
-              
-              return (
-                <div
-                  key={asesor.id}
-                  className={`bg-gradient-to-br ${getVentasColor(
-                    ventasUSD
-                  )} ${getCitasColor(asesor)} p-4 rounded-lg shadow-md`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-semibold text-white">
-                        {asesor.nombre}
-                      </h3>
-                      <p className="text-sm text-gray-200">
-                        ID: {asesor.codigo}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-white">
-                        ${ventasTotal.toLocaleString()} COP
-                        <br />
-                        <span className="text-sm text-gray-200">
-                          (${ventasUSD.toLocaleString()} USD)
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-200">
-                        Citas: {visitasTotal}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {/* Pestañas */}
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
+          {[
+            { key: 'programas', label: 'Programas', icon: FileText },
+            { key: 'referidos', label: 'Referidos', icon: UserPlus },
+            { key: 'visitas', label: 'Visitas', icon: Calendar },
+            { key: 'clientes', label: 'Clientes', icon: Users },
+            { key: 'notas', label: 'Notas', icon: StickyNote },
+            { key: 'perfiles', label: 'Equipo', icon: Users },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                activeTab === tab.key
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                  : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-white">Televentas</h2>
-          <div className="space-y-4 max-h-[400px] overflow-y-auto">
-            {televentas.map((televenta) => (
-              <div
-                key={televenta.id}
-                className="bg-gradient-to-br from-gray-700 to-gray-600 p-4 rounded-lg shadow-md"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold text-white">
-                      {televenta.nombre}
-                    </h3>
-                    <p className="text-sm text-gray-200">
-                      ID: {televenta.codigo}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Contenido de la pestaña activa */}
+        <div className="glass-card p-6">
+          {renderTabContent()}
+        </div>
+
+        {/* Resumen rápido (tarjetas de conteo) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-8">
+          {Object.entries(data).map(([key, items]) => (
+            <div key={key} className="stat-card text-center">
+              <p className="text-2xl font-bold text-white">{items.length}</p>
+              <p className="text-xs text-blue-200 uppercase">{key}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

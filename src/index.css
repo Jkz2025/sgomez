@@ -102,3 +102,33 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-blue-500;
 }
+
+/* Fondo estilo TradingView */
+.bg-trading {
+  background-color: #0b0e11;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+  position: relative;
+}
+
+/* Efecto vignette (oscurecimiento en bordes) */
+.bg-trading::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Asegura que el contenido esté por encima del vignette */
+.bg-trading > * {
+  position: relative;
+  z-index: 1;
+}

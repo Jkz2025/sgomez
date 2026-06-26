@@ -257,10 +257,10 @@ const DashboardAsesor = () => {
             <Calendar className="w-8 h-8 text-blue-400" />
             <span className="text-white font-medium">Agendar Cita</span>
           </button>
-          <button 
-            onClick={() => setActiveModal('agregarPrograma')}
-            className="stat-card flex flex-col items-center justify-center space-y-2"
-          >
+            <button 
+              onClick={() => setActiveModal('agregarPrograma')}
+              className="stat-card flex flex-col items-center justify-center space-y-2"
+            >
             <FileText className="w-8 h-8 text-green-400" />
             <span className="text-white font-medium">Agregar Programa</span>
           </button>
@@ -398,7 +398,7 @@ const DashboardAsesor = () => {
                       onClick={() => handleRealizar(visita, "complete")}
                       className="flex-1 gradient-button py-2 rounded-lg text-sm"
                     >
-                      Marcar Realizada
+                      Realizar
                     </button>
                     <button
                       onClick={() => handleReprogramar(visita, "reprogramar")}
