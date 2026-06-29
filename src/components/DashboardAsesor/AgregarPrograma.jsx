@@ -27,7 +27,7 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
     ciudad: '', 
     barrio_ciudad: '',
     razon_recomendacion: '',
-    distribucion: distribucion
+    distribucion: distribucion,
   });
 
   const handleProgramaChange = (e) => {
@@ -120,7 +120,8 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
         barrio_ciudad: referido.barrio_ciudad,
         ciudad: referido.ciudad,
         relacion: referido.relacion,
-        razon_recomendacion: referido.razon_recomendacion
+        razon_recomendacion: referido.razon_recomendacion,
+        distribucion: referido.distribucion
       }));
 
       const { error: referidosError } = await supabase
