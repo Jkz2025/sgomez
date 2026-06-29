@@ -9,6 +9,7 @@ const AgendarCita = ({ onClose, onCitaAgendada }) => {
  const { distribucion, loading} = useUserDistribucion()
 
   const [formData, setFormData] = useState({
+    tipo_visita: '',
     cliente_nombre: '',
     cliente_telefono: '',
     cliente_direccion: '',
@@ -17,7 +18,7 @@ const AgendarCita = ({ onClose, onCitaAgendada }) => {
     fecha: '',
     hora: '',
     notas: '',
-    distribucion: distribucion 
+    distribucion: distribucion,
   });
 
   const handleChange = (e) => {
@@ -41,6 +42,7 @@ const AgendarCita = ({ onClose, onCitaAgendada }) => {
         .from('visitas')
         .insert({
           asesor: userId,
+          tipo_visita: formData.tipo_visita,
           cliente_nombre: formData.cliente_nombre,
           cliente_telefono: formData.cliente_telefono,
           cliente_direccion: formData.cliente_direccion,
@@ -89,7 +91,24 @@ const AgendarCita = ({ onClose, onCitaAgendada }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                  <label className="block text-blue-200 mb-2">Tipo Visita</label>
+                  <select
+                    name="tipo_visita"
+                    value={formData.tipo_visita}
+                    onChange={handleChange}
+                    className="input-field"
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="demostracion normal">Demostracion normal</option>
+                    <option value="demo torta">Demo torta</option>
+                    <option value="demo torta obsequio">Demo torta obsequio</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Servicio Inicial">Servicio Inicial</option>
+                  </select>
+                </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               
               <div>
                 <label className="block text-blue-200 mb-2 flex items-center">
                   <User className="w-4 h-4 mr-2" />
