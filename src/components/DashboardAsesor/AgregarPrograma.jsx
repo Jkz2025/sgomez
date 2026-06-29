@@ -13,6 +13,7 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
     cliente_direccion: '',
     fecha: '',
     regalo: '',
+    ciudad: '',
     distribucion: distribucion
   });
 
@@ -22,8 +23,11 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
     telefono: '',
     estado_civil: '',
     trabajo: '',
+    relacion: '',
+    ciudad: '', 
     barrio_ciudad: '',
-    razon_recomendacion: ''
+    razon_recomendacion: '',
+    distribucion: distribucion
   });
 
   const handleProgramaChange = (e) => {
@@ -97,6 +101,7 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
           cliente_telefono: programaData.cliente_telefono,
           cliente_direccion: programaData.cliente_direccion,
           regalo: programaData.regalo,
+          ciudad: programaData.ciudad,
           distribucion: programaData.distribucion
         })
         .select()
@@ -113,6 +118,8 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
         estado_civil: referido.estado_civil,
         trabajo: referido.trabajo,
         barrio_ciudad: referido.barrio_ciudad,
+        ciudad: referido.ciudad,
+        relacion: referido.relacion,
         razon_recomendacion: referido.razon_recomendacion
       }));
 
@@ -192,7 +199,7 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div >
                   <label className="block text-blue-200 mb-2 flex items-center">
                     <MapPin className="w-4 h-4 mr-2" />
                     Dirección
@@ -207,6 +214,21 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
                   />
                 </div>
 
+<div>
+                  <label className="block text-blue-200 mb-2 flex items-center">
+                                       <MapPin className="w-4 h-4 mr-2" />
+
+                    Ciudad
+                  </label>
+                  <input
+                    type="text"
+                    name="ciudad"
+                    value={programaData.ciudad}
+                    onChange={handleProgramaChange}
+                    className="input-field"
+                    required
+                  />
+                </div>
                 <div>
                   <label className="block text-blue-200 mb-2 flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
@@ -312,8 +334,28 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
                   />
                 </div>
 
+ <div>
+                  <label className="block text-blue-200 mb-2">Relacion</label>
+                  <input
+                    type="text"
+                    name="relacion"
+                    value={referidoActual.relacion}
+                    onChange={handleReferidoChange}
+                    className="input-field"
+                  />
+                </div>
                 <div>
-                  <label className="block text-blue-200 mb-2">Barrio/Ciudad</label>
+                  <label className="block text-blue-200 mb-2">Ciudad</label>
+                  <input
+                    type="text"
+                    name="ciudad"
+                    value={referidoActual.ciudad}
+                    onChange={handleReferidoChange}
+                    className="input-field"
+                  />
+                </div>
+            <div>
+                  <label className="block text-blue-200 mb-2">Barrio</label>
                   <input
                     type="text"
                     name="barrio_ciudad"
@@ -322,7 +364,6 @@ const AgregarPrograma = ({ onClose, onProgramaAgregado }) => {
                     className="input-field"
                   />
                 </div>
-
                 <div className="md:col-span-2">
                   <label className="block text-blue-200 mb-2">¿Por qué lo recomendó?</label>
                   <textarea

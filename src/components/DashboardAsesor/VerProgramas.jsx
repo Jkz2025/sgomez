@@ -45,6 +45,7 @@ const { data, error } = await supabase
     estado_civil,
     trabajo,
     barrio_ciudad,
+    ciudad,
     razon_recomendacion
   )
 `)
@@ -209,7 +210,7 @@ const { data, error } = await supabase
                                 {referido.barrio_ciudad && (
                                   <p className="text-blue-200">
                                     <MapPin className="w-3 h-3 inline mr-1" />
-                                    {referido.barrio_ciudad}
+                                    {referido.ciudad} - {referido.barrio_ciudad} 
                                   </p>
                                 )}
                                 {referido.razon_recomendacion && (
