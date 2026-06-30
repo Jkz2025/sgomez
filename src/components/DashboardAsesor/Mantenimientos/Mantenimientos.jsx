@@ -1,7 +1,6 @@
 // Mantenimientos.jsx
 import { useState, useEffect } from 'react';
-import { supabase } from '<div styleName={} />
- stylFunctions/CreateClient';
+import { supabase } from '../../Functions/CreateClient'
 import Swal from 'sweetalert2';
 import { Wrench, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 
